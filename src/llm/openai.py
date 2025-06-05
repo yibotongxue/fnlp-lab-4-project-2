@@ -28,10 +28,12 @@ class _BaseOpenAILLM(BaseLLM):
         Returns:
             str: The generated response from the LLM.
         """
-        response = self.client.responses.create(
+        response = self.client.chat.completions.create(
             model=self.model_name,
-            instructions=system_prompt,
-            input=prompt,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": prompt},
+            ],
         )
         return response.choices[0].message.content
 
@@ -54,3 +56,13 @@ class QwenLLM(_BaseOpenAILLM):
             api_key (str): Your OpenAI API key.
         """
         super(api_key, "https://dashscope.aliyuncs.com/compatible-mode/v1", model_name)
+
+
+class DeepSeekLLM(_BaseOpenAILLM):
+    def __init__(self, api_key: str, model_name: str = "deepseek-chat"):
+        """
+        Initialize the DeepSeek LLM with the provided API key.
+        Args:
+            api_key (str): Your OpenAI API key.
+        """
+        super().__init__(api_key, "https://api.deepseek.com", model_name)
