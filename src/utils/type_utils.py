@@ -2,10 +2,6 @@ from typing import List
 
 from pydantic import BaseModel
 
-__all__ = [
-    "CaseDataDict",
-]
-
 
 class JudgmentDict(BaseModel):
     standard_accusation: str
