@@ -27,7 +27,6 @@ class ZeroShotPredictor(BasePredictor):
         prompt = self.build_zero_shot_prompt(fact, defendants)
         response = self.llm.generate(
             prompt,
-            system_prompt="如果用户要求你输出JSON格式，请直接输出JSON格式，不要有其他的输出，特别注意不需要用代码框包围，即不要输出```json```这样的内容。",
         )
         outcomes = robust_dict_from_str(response)
         assert "outcomes" in outcomes, "The response does not contain 'outcomes' key."
@@ -54,7 +53,7 @@ class ZeroShotPredictor(BasePredictor):
         """
         # TODO Implement the actual prompt construction logic
         prompt = f"""
-        你是一个中华人民共和国的人民法官，你现在需要根据检察院对多名被告的指控，依据中华人民共和国刑法，
+        你是一个中华人民共和国的法官，你现在需要根据检察院对多名被告的指控，依据中华人民共和国刑法，
         判断每个被告犯下的所有罪名，并给出每个罪名的量刑，量刑以月为单位。进行判决的时候，你应该注意：
         1. 你要完整、仔细的阅读检察官的指控，你的量刑必须严格的按照检察官的指控事实作出，不能脱离事实，也不必怀疑检察官的指控
         2. 你应该按照中华人民共和国刑法的法律条款判决，每个被告的罪名都必须在刑法中有所对应，比如“伪证罪”
@@ -66,7 +65,8 @@ class ZeroShotPredictor(BasePredictor):
         \n{fact}\n
         以下是被告的名单：
         {', '.join(defendants)}
-        请你根据以上信息，给出每个被告的罪名和量刑，使用JSON格式，一个示例如下：
+        请你根据以上信息，给出每个被告的罪名和量刑，在此之前你应该进行详细的分析，对每一个被告要分析指控中他涉及的部分，注意被告可能同时被指控多项罪行，然后分析他可能涉及的罪名，并注意要引用中华人民共和国刑法的法律条文，然后对他的每一条成立的罪名根据罪行和法律条文分析量刑，
+        最后使用JSON格式对之前的分析进行总结，一个示例如下：
         {{"outcomes": [{{"name": "第一个被告姓名", "judgment": [{{"standard_accusation": "第一个被告第一个罪名", "imprisonment": <对应的刑期，使用整数>}}, {{"standard_accusation": "第一个被告的第二个罪名", "imprisonment": <对应的刑期，使用整数>}}]}}, {{"name": "第二个被告", "judgment": [{{"standard_accusation": "第二个被告的第一个罪名", "imprisonment": "<对应的刑期，使用整数>"}}]}}]}}
         一个可能的示例是：
         {{"outcomes": [{{"name": "靳某某", "judgment": [{{"standard_accusation": "对单位行贿罪", "imprisonment": 0}}, {{"standard_accusation": "非法利用信息网络罪", "imprisonment": 1}}]}}, {{"name": "第二个被告", "judgment": [{{"standard_accusation": "对单位行贿罪", "imprisonment": 1}}]}}]}}
