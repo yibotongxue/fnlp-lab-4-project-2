@@ -90,7 +90,17 @@ class LegalCaseDataSet(Dataset):
     def all_cases(self) -> list[CaseDataDict]:
         return self._load_all_cases()
 
-    def __getitem__(self, index: int) -> CaseDataDict:
+    def __getitem__(self, index: int | slice) -> CaseDataDict:
+        if isinstance(index, slice):
+            return [
+                self.all_cases[i] for i in range(*index.indices(len(self.all_cases)))
+            ]
+        elif isinstance(index, int):
+            return self._get_case_by_index(index)
+        else:
+            raise TypeError("Index must be an integer or a slice.")
+
+    def _get_case_by_index(self, index: int) -> CaseDataDict:
         if index < 0 or index >= len(self.all_cases):
             raise IndexError("Index out of range.")
         return self.all_cases[index]

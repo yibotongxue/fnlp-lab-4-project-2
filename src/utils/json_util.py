@@ -30,3 +30,15 @@ def load_json(file_path: str) -> dict:
     """
     with open(file_path, encoding="utf-8") as file:
         return json.load(file)
+
+
+def save_json(data: dict, file_path: str) -> None:
+    """
+    Save a dictionary to a JSON file.
+
+    Args:
+        data (dict): The dictionary to save.
+        file_path (str): The path where the JSON file will be saved.
+    """
+    with open(file_path, "w", encoding="utf-8") as file:
+        json.dump(data, file, ensure_ascii=False, indent=4)

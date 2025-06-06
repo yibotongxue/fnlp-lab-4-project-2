@@ -28,6 +28,17 @@ class OutcomeDict(BaseModel):
         else:
             raise KeyError(f"Invalid key: {item}")
 
+    @property
+    def standard_accusation(self) -> list[str]:
+        return [j.standard_accusation for j in self.judgment]
+
+    def get_accusation_str(self) -> str:
+        return ",".join(self.standard_accusation)
+
+    @property
+    def imprisonment(self) -> list[int]:
+        return [j.imprisonment for j in self.judgment]
+
 
 class CaseDataDict(BaseModel):
     fact: str

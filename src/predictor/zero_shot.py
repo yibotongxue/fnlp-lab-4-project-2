@@ -141,7 +141,7 @@ class ZeroShotPredictor(BasePredictor):
                 result.append(OutcomeDict(**outcome))
             except:
                 raise ValueError(f"Invalid outcome format: {outcome}")
-        return result
+        return response, result
 
     @staticmethod
     def build_zero_shot_prompt(fact: str, defendants: list[str]) -> str:

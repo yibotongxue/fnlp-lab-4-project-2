@@ -6,7 +6,7 @@ from .base import BaseLLM
 
 
 class _BaseOpenAILLM(BaseLLM):
-    def __init__(self, api_key: str, base_url: Optional[str], model_name):
+    def __init__(self, api_key: str, base_url: Optional[str], model_name: str):
         """
         Initialize the OpenAI LLM with the provided API key and base URL.
 
