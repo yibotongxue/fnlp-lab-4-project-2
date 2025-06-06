@@ -45,7 +45,7 @@ class OpenAILLM(_BaseOpenAILLM):
         Args:
             api_key (str): Your OpenAI API key.
         """
-        super(api_key, None, model_name)
+        super().__init__(api_key, None, model_name)
 
 
 class QwenLLM(_BaseOpenAILLM):
@@ -55,7 +55,9 @@ class QwenLLM(_BaseOpenAILLM):
         Args:
             api_key (str): Your OpenAI API key.
         """
-        super(api_key, "https://dashscope.aliyuncs.com/compatible-mode/v1", model_name)
+        super().__init__(
+            api_key, "https://dashscope.aliyuncs.com/compatible-mode/v1", model_name
+        )
 
 
 class DeepSeekLLM(_BaseOpenAILLM):

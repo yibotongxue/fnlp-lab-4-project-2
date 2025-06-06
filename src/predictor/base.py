@@ -9,7 +9,7 @@ class BasePredictor(ABC):
     """
 
     @abstractmethod
-    def predict_judgment(self, fact: str, defendants: list[str]) -> OutcomeDict:
+    def predict_judgment(self, fact: str, defendants: list[str]) -> list[OutcomeDict]:
         """
         Predicts the standard accusation judgment based on the provided fact.
 
@@ -17,6 +17,6 @@ class BasePredictor(ABC):
             fact (str): The fact to analyze.
 
         Returns:
-            list[tuple[str, int]]: A list of tuples containing the accusation and its score.
+            list[OutcomeDict]: A list of predicted outcomes, each containing the name and judgment details.
         """
         raise NotImplementedError("This method should be overridden by subclasses.")

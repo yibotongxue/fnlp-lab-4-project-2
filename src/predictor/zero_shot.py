@@ -1,4 +1,6 @@
 from ..llm import BaseLLM
+from ..utils import robust_dict_from_str
+from ..utils.type_utils import OutcomeDict
 from .base import BasePredictor
 
 
@@ -8,7 +10,7 @@ class ZeroShotPredictor(BasePredictor):
     def __init__(self, llm: BaseLLM):
         self.llm = llm
 
-    def predict_judgment(self, fact: str, defendants: list[str]) -> dict[str, str]:
+    def predict_judgment(self, fact: str, defendants: list[str]) -> list[OutcomeDict]:
         """
         Generate a response based on the provided fact using the LLM.
 
@@ -17,15 +19,23 @@ class ZeroShotPredictor(BasePredictor):
             defendants (list[str]): A list of defendants to include in the response.
 
         Returns:
-            dict[str, str]: A dictionary containing the generated response.
+            list[OutcomeDict]: A list of predicted outcomes, each containing the name and judgment details.
         """
-        # TODO Implement the actual prediction logic
         prompt = self.build_zero_shot_prompt(fact, defendants)
         response = self.llm.generate(
             prompt,
-            system_prompt="如果用户要求你输出JSON格式，请直接输出JSON格式，不要有其他的输出",
+            system_prompt="如果用户要求你输出JSON格式，请直接输出JSON格式，不要有其他的输出，特别注意不需要用代码框包围，即不要输出```json```这样的内容。",
         )
-        return response
+        outcomes = robust_dict_from_str(response)
+        assert "outcomes" in outcomes, "The response does not contain 'outcomes' key."
+        assert isinstance(outcomes["outcomes"], list), "'outcomes' should be a list."
+        result = []
+        for outcome in outcomes["outcomes"]:
+            try:
+                result.append(OutcomeDict(**outcome).model_dump())
+            except:
+                raise ValueError(f"Invalid outcome format: {outcome}")
+        return result
 
     @staticmethod
     def build_zero_shot_prompt(fact: str, defendants: list[str]) -> str:
