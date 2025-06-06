@@ -52,30 +52,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-import sys
-
-sys.exit(0)
-
-load_dotenv()
-
-train_data = LegalCaseDataSet("./data/train.jsonl")
-train_data = train_data[2]
-print(train_data)
-
-deepseek = QwenLLM(api_key=os.getenv("QWEN_API_KEY"))
-
-zero_shot_predictor = ZeroShotPredictor(deepseek)
-
-prompt = zero_shot_predictor.build_zero_shot_prompt(
-    fact=train_data.fact, defendants=train_data.defendants
-)
-
-# print(prompt)
-
-result = zero_shot_predictor.predict_judgment(
-    fact=train_data.fact, defendants=train_data.defendants
-)
-
-print(result)
