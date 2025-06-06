@@ -1,3 +1,5 @@
+from typing import override
+
 from ..llm import BaseLLM
 from ..utils import robust_dict_from_str
 from ..utils.type_utils import OutcomeDict
@@ -10,6 +12,7 @@ class ZeroShotPredictor(BasePredictor):
     def __init__(self, llm: BaseLLM):
         self.llm = llm
 
+    @override
     def predict_judgment(self, fact: str, defendants: list[str]) -> list[OutcomeDict]:
         """
         Generate a response based on the provided fact using the LLM.
@@ -32,7 +35,7 @@ class ZeroShotPredictor(BasePredictor):
         result = []
         for outcome in outcomes["outcomes"]:
             try:
-                result.append(OutcomeDict(**outcome).model_dump())
+                result.append(OutcomeDict(**outcome))
             except:
                 raise ValueError(f"Invalid outcome format: {outcome}")
         return result
