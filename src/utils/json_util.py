@@ -1,4 +1,5 @@
 import json
+import os
 
 
 def load_jsonl(file_path: str) -> list[dict]:
@@ -11,6 +12,8 @@ def load_jsonl(file_path: str) -> list[dict]:
     Returns:
         list[dict]: A list of dictionaries loaded from the file.
     """
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"The file {file_path} does not exist.")
     data = []
     with open(file_path, encoding="utf-8") as file:
         for line in file:
@@ -28,6 +31,8 @@ def load_json(file_path: str) -> dict:
     Returns:
         dict: The content of the JSON file as a dictionary.
     """
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"The file {file_path} does not exist.")
     with open(file_path, encoding="utf-8") as file:
         return json.load(file)
 
@@ -40,5 +45,7 @@ def save_json(data: dict, file_path: str) -> None:
         data (dict): The dictionary to save.
         file_path (str): The path where the JSON file will be saved.
     """
+    if os.path.exists(file_path):
+        os.remove(file_path)
     with open(file_path, "w", encoding="utf-8") as file:
         json.dump(data, file, ensure_ascii=False, indent=4)

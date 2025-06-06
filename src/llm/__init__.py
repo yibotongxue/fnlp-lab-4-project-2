@@ -1,9 +1,7 @@
 from .base import BaseLLM
-from .openai import DeepSeekLLM, OpenAILLM, QwenLLM
+from .factory import get_llm
 
 __all__ = [
     "BaseLLM",
-    "OpenAILLM",
-    "QwenLLM",
-    "DeepSeekLLM",
+    "get_llm",
 ]
