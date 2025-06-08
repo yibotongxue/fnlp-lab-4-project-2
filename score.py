@@ -1,3 +1,4 @@
+import argparse
 import os
 
 import pandas as pd
@@ -8,12 +9,21 @@ from src.utils import load_json
 from src.utils.type_utils import OutcomeDict
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Score zero-shot predictions")
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        default="./output",
+        help="Directory containing the zero-shot prediction results",
+    )
+    args = parser.parse_args()
+    output_dir = args.output_dir
     solution_data = {"id": [], "gold_accusation": [], "gold_imprisonment": []}
     submission_data = {"id": [], "accusations": [], "imprisonment": []}
-    for i in range(2):
-        json_file = os.path.join("output", "zero_shot", f"result_{i}.json")
-        solution_data["id"].append(str(i + 1))
-        submission_data["id"].append(str(i + 1))
+    for json_file in os.listdir(os.path.join(output_dir, "zero_shot")):
+        solution_data["id"].append(json_file.split(".")[0])
+        submission_data["id"].append(json_file.split(".")[0])
+        json_file = os.path.join(output_dir, "zero_shot", json_file)
         data = load_json(json_file)
         solution_outcome = data["input"]["outcomes"]
         solution_outcome = [OutcomeDict(**outcome) for outcome in solution_outcome]
