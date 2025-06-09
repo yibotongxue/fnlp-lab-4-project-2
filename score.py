@@ -21,14 +21,29 @@ if __name__ == "__main__":
     solution_data = {"id": [], "gold_accusation": [], "gold_imprisonment": []}
     submission_data = {"id": [], "accusations": [], "imprisonment": []}
     for json_file in os.listdir(os.path.join(output_dir, "zero_shot")):
-        solution_data["id"].append(json_file.split(".")[0])
-        submission_data["id"].append(json_file.split(".")[0])
         json_file = os.path.join(output_dir, "zero_shot", json_file)
         data = load_json(json_file)
         solution_outcome = data["input"]["outcomes"]
-        solution_outcome = [OutcomeDict(**outcome) for outcome in solution_outcome]
         submission_outcome = data["result"]
-        submission_outcome = [OutcomeDict(**outcome) for outcome in submission_outcome]
+        if not len(solution_outcome) == len(submission_outcome):
+            print(
+                f"Skipping {json_file} due to mismatched outcome lengths. Len of solution: {len(solution_outcome)}, len of submission: {len(submission_outcome)}"
+            )
+            continue
+        try:
+            solution_outcome = [OutcomeDict(**outcome) for outcome in solution_outcome]
+        except Exception as e:
+            print(f"Error processing {json_file}: {e}")
+            continue
+        try:
+            submission_outcome = [
+                OutcomeDict(**outcome) for outcome in submission_outcome
+            ]
+        except Exception as e:
+            print(f"Error processing {json_file}: {e}")
+            continue
+        solution_data["id"].append(json_file.split("/")[-1].split(".")[0])
+        submission_data["id"].append(json_file.split("/")[-1].split(".")[0])
         solution_data["gold_accusation"].append(
             ";".join([outcome.get_accusation_str() for outcome in solution_outcome])
         )

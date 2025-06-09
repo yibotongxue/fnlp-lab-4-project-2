@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 class JudgmentDict(BaseModel):
     standard_accusation: str
-    imprisonment: int
+    imprisonment: int | str | float
 
     def __getitem__(self, item):
         if item == "standard_accusation":

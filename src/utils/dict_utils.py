@@ -38,12 +38,13 @@ def robust_dict_from_str(s: str) -> dict:
         pass
 
     # 尝试3: 提取JSON代码块 (```json...```)
-    json_block = re.search(r"```(?:json)?\s*({.*?})\s*```", normalized_s, re.DOTALL)
-    if json_block:
+    json_blocks = re.findall(r"```(?:json)?\s*({.*?})\s*```", normalized_s, re.DOTALL)
+    if json_blocks:
+        last_json_block = json_blocks[-1]  # 获取最后一个匹配项
         try:
-            return json.loads(json_block.group(1))
+            return json.loads(last_json_block)  # 解析最后一个 JSON 块
         except json.JSONDecodeError:
-            pass
+            pass  # 解析失败时忽略
 
     # 尝试4: 改进的括号匹配提取字典结构
     stack = []

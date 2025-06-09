@@ -49,3 +49,18 @@ def save_json(data: dict, file_path: str) -> None:
         os.remove(file_path)
     with open(file_path, "w", encoding="utf-8") as file:
         json.dump(data, file, ensure_ascii=False, indent=4)
+
+
+def save_jsonl(data: list[dict], file_path: str) -> None:
+    """
+    Save a list of dictionaries to a JSON Lines file.
+
+    Args:
+        data (list[dict]): The list of dictionaries to save.
+        file_path (str): The path where the JSON Lines file will be saved.
+    """
+    if os.path.exists(file_path):
+        os.remove(file_path)
+    with open(file_path, "w", encoding="utf-8") as file:
+        for item in data:
+            file.write(json.dumps(item, ensure_ascii=False) + "\n")
