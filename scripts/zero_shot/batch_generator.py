@@ -1,14 +1,8 @@
 import argparse
-import os
 
-from dotenv import load_dotenv
-
-from src.llm import get_llm
 from src.predictor import ZeroShotPredictor
-from src.utils import save_json
+from src.utils import save_jsonl
 from src.utils.data_utils import LegalCaseDataSet
-
-load_dotenv()
 
 
 def get_data(split: str = "train") -> LegalCaseDataSet:
@@ -24,10 +18,10 @@ def get_data(split: str = "train") -> LegalCaseDataSet:
 def main():
     parser = argparse.ArgumentParser(description="Zero-shot legal case prediction")
     parser.add_argument(
-        "--output-dir",
+        "--output-file",
         type=str,
-        default="./output",
-        help="Directory to save the output results",
+        default="batch.jsonl",
+        help="File to save the zero-shot prediction requests in JSONL format",
     )
     parser.add_argument(
         "--split",
@@ -55,37 +49,42 @@ def main():
         help="Number of training cases to use for zero-shot prediction",
     )
     args = parser.parse_args()
-    output_dir = args.output_dir
     split = args.split
     model_name = args.model_name
     start_index = args.start_index
     train_size = args.train_size
 
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
     legal_data = get_data(split)
     if train_size is not None:
         legal_data = legal_data[start_index : start_index + train_size]
     else:
         legal_data = legal_data[start_index:]
     print(f"Loaded {len(legal_data)} cases from the dataset.")
-    llm = get_llm(model_name=model_name)
-    zero_shot_predictor = ZeroShotPredictor(llm)
+    jsonl_data = []
+    url_dict = {
+        "batch-test-model": "/v1/chat/ds-test",
+    }
     for i, data in enumerate(legal_data):
         result_to_save = {}
-        result_to_save["input"] = data.model_dump()
-        prompt = zero_shot_predictor.build_zero_shot_prompt(
-            fact=data.fact, defendants=data.defendants
-        )
-        result_to_save["system_prompt"] = zero_shot_predictor.system_prompt
-        result_to_save["prompt"] = prompt
-        response, result = zero_shot_predictor.predict_judgment(
-            fact=data.fact, defendants=data.defendants
-        )
-        result_to_save["response"] = response
-        result_to_save["result"] = [outcome.model_dump() for outcome in result]
-        save_json(result_to_save, os.path.join(output_dir, f"{i + start_index}.json"))
+        result_to_save["custom_id"] = str(i + 1)
+        result_to_save["method"] = "POST"
+        result_to_save["url"] = url_dict.get(model_name, "/v1/chat/completions")
+        result_to_save["body"] = {
+            "model": model_name,
+            "messages": [
+                {"role": "system", "content": ZeroShotPredictor.system_prompt},
+                {
+                    "role": "user",
+                    "content": ZeroShotPredictor.build_zero_shot_prompt(
+                        fact=data.fact, defendants=data.defendants
+                    ),
+                },
+            ],
+        }
+        jsonl_data.append(result_to_save)
         print(f"Processed case {i + 1}/{len(legal_data)}")
+    save_jsonl(jsonl_data, args.output_file)
+    print(f"Zero-shot prediction requests saved to {args.output_file}")
 
 
 if __name__ == "__main__":
