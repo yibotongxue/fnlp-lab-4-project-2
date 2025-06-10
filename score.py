@@ -20,8 +20,8 @@ if __name__ == "__main__":
     output_dir = args.output_dir
     solution_data = {"id": [], "gold_accusation": [], "gold_imprisonment": []}
     submission_data = {"id": [], "accusations": [], "imprisonment": []}
-    for json_file in os.listdir(os.path.join(output_dir, "zero_shot")):
-        json_file = os.path.join(output_dir, "zero_shot", json_file)
+    for json_file in os.listdir(os.path.join(output_dir)):
+        json_file = os.path.join(output_dir, json_file)
         data = load_json(json_file)
         solution_outcome = data["input"]["outcomes"]
         submission_outcome = data["result"]
