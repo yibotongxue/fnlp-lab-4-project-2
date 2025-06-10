@@ -54,6 +54,10 @@ class ChargeLoader:
     def all_charges(self) -> dict[str, int]:
         return self._load_all_charges()
 
+    @cached_property
+    def reverse_charges(self) -> dict[int, str]:
+        return {v: k for k, v in self.all_charges.items()}
+
     def load_charge_id(self, charge_name: str) -> int:
         if charge_name not in self.all_charges:
             raise KeyError(f"Charge name '{charge_name}' not found in the file.")
