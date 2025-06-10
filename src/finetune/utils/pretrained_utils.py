@@ -138,7 +138,6 @@ def load_pretrained_models(
         cache_dir=cache_dir,
         **auto_model_kwargs,
     )
-    print(auto_model_kwargs)
     tokenizer = AutoTokenizer.from_pretrained(
         model_name_or_path,
         *auto_tokenizer_args,

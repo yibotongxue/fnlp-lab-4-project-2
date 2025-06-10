@@ -40,8 +40,8 @@ class LegalTrainer(Trainer):
         imprisonment_logits = outputs.imprisonment_logits
         charge_labels = inputs["labels"]["charge_id"]
         imprisonment_labels = inputs["labels"]["imprisonment"]
-        charge_loss = self.compute_charge_loss(charge_logits, charge_labels)
-        imprisonment_loss = self.compute_imprisonment_loss(
+        charge_loss = self._compute_charge_loss(charge_logits, charge_labels)
+        imprisonment_loss = self._compute_imprisonment_loss(
             imprisonment_logits, imprisonment_labels, charge_labels
         )
         total_loss = (
@@ -52,7 +52,7 @@ class LegalTrainer(Trainer):
             return total_loss, outputs
         return total_loss
 
-    def compute_charge_loss(self, charge_logits, charge_labels):
+    def _compute_charge_loss(self, charge_logits, charge_labels):
         """
         Computes the charge loss using cross-entropy loss.
 
@@ -70,7 +70,7 @@ class LegalTrainer(Trainer):
             reduction="mean",  # Average loss over the batch
         )
 
-    def compute_imprisonment_loss(
+    def _compute_imprisonment_loss(
         self, imprisonment_logits, imprisonment_labels, charge_labels
     ):
         """

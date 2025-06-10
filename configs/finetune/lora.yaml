@@ -1,0 +1,22 @@
+train_config:
+  output_dir: ./output/finetune/lora
+  logging_dir: ./output/finetune/lora/logs
+  learning_rate: 5e-5
+  train_batch_size: 8
+  eval_batch_size: 8
+  epochs: 3
+  weight_decay: 0.01
+  eval_strategy: "epoch"
+  save_strategy: "epoch"
+  charge_weight: 1.0
+  imprisonment_weight: 1.0
+  enable_wandb: false
+  run_name: "full_run"
+  wandb_project: "legal-prediction"
+  extra_model_kwargs: {}
+  extra_tokenizer_kwargs: {}
+  model_max_length: 512
+  lora_config:
+    rank: 8
+    alpha: 16
+    dropout: 0.05
