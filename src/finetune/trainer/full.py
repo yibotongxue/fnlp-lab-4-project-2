@@ -2,18 +2,24 @@ from typing import override
 
 from ..utils import load_pretrained_models
 from .base import BaseTrainer
+from ..model import LegalPredictionModel
 
 
 class FullTrainer(BaseTrainer):
     @override
     def init_model(self):
         """Initialize the model with pretrained weights."""
-        self.model, self.tokenizer = load_pretrained_models(
+        base_model, self.tokenizer = load_pretrained_models(
             self.args.model_name_or_path,
             model_max_length=self.args.model_max_length,
             cache_dir=self.args.cache_dir,
             auto_model_kwargs=self.args.extra_model_kwargs,
             auto_tokenizer_kwargs=self.args.extra_tokenizer_kwargs,
+        )
+        self.model = LegalPredictionModel(
+            base_model,
+            charge_num=self.train_config["charge_num"],
+            imprisonment_num=self.train_config["imprisonment_num"],
         )
 
 
@@ -50,7 +56,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--test-data-path", type=str, required=True, help="Path to the test data."
     )
-    parser.add_argument("--model-max-length", type=int, default=4096)
+    parser.add_argument("--model-max-length", type=int, default=512)
     parser.add_argument(
         "--cache-dir",
         type=str,

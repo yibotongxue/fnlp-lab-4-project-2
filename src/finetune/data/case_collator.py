@@ -18,9 +18,9 @@ class CustomDataCollator:
         attention_mask = torch.stack([f["attention_mask"] for f in features])
 
         # 如果是训练集，包含标签
-        if "charge_id" in features[0]:
-            charge_ids = torch.stack([f["charge_id"] for f in features])
-            imprisonments = torch.stack([f["imprisonment"] for f in features])
+        if "label" in features[0]:
+            charge_ids = torch.stack([f["label"]["charge_id"] for f in features])
+            imprisonments = torch.stack([f["label"]["imprisonment"] for f in features])
             return {
                 "input_ids": input_ids,
                 "attention_mask": attention_mask,

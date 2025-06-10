@@ -6,7 +6,8 @@ train_config:
   eval_batch_size: 8
   epochs: 3
   weight_decay: 0.01
-  eval_strategy: "epoch"
+  eval_strategy: "steps"
+  eval_steps: 500
   save_strategy: "epoch"
   charge_weight: 1.0
   imprisonment_weight: 1.0
@@ -16,3 +17,5 @@ train_config:
   extra_model_kwargs: {}
   extra_tokenizer_kwargs: {}
   model_max_length: 512
+  charge_num: 321
+  imprisonment_num: 600

@@ -43,7 +43,7 @@ class BaseTrainer(ABC):
             train_raw_cases[:-1000], self.tokenizer, is_train=True
         )
         self.test_dataset = CaseDataset(
-            test_raw_cases[-1000:], self.tokenizer, is_train=False
+            test_raw_cases[-1000:], self.tokenizer, is_train=True
         )
         self.data_collator = CustomDataCollator()
 
@@ -61,8 +61,8 @@ class BaseTrainer(ABC):
                 num_train_epochs=int(self.train_config["epochs"]),
                 weight_decay=float(self.train_config["weight_decay"]),
                 eval_strategy=self.train_config["eval_strategy"],
+                eval_steps=self.train_config.get("eval_steps", 500),
                 save_strategy=self.train_config["save_strategy"],
-                load_best_model_at_end=True,
                 push_to_hub=False,
                 report_to="wandb",
                 run_name=self.train_config["run_name"],
@@ -78,8 +78,8 @@ class BaseTrainer(ABC):
                 num_train_epochs=int(self.train_config["epochs"]),
                 weight_decay=float(self.train_config["weight_decay"]),
                 eval_strategy=self.train_config["eval_strategy"],
+                eval_steps=self.train_config.get("eval_steps", 500),
                 save_strategy=self.train_config["save_strategy"],
-                load_best_model_at_end=True,
                 push_to_hub=False,
                 logging_dir=self.train_config["logging_dir"],
                 logging_steps=10,
@@ -89,7 +89,7 @@ class BaseTrainer(ABC):
             model=self.model,
             args=self.training_args,
             train_dataset=self.train_dataset,
-            eval_dataset=self.train_dataset,
+            eval_dataset=self.test_dataset,
             tokenizer=self.tokenizer,
             data_collator=self.data_collator,
             charge_weight=self.train_config["charge_weight"],
@@ -104,10 +104,7 @@ class BaseTrainer(ABC):
 
     def compute_metrics(self, eval_pred):
         predictions, labels = eval_pred
-        charge_logits, imprisonment_logits = (
-            predictions.charge_logits,
-            predictions.imprisonment_logits,
-        )
+        charge_logits, imprisonment_logits = predictions
         charge_preds = np.argmax(charge_logits, axis=1)
         imprisonment_preds = np.argmax(imprisonment_logits, axis=1)
         charge_labels = labels["charge_id"]
@@ -126,11 +123,20 @@ class BaseTrainer(ABC):
             references=imprisonment_labels,
             average="micro",
         )["f1"]
+        predict_imprisonment_mean = np.mean(
+            imprisonment_preds[imprisonment_labels != -1]
+        )
+        delta_imprisonment = np.abs(
+            predict_imprisonment_mean
+            - np.mean(imprisonment_labels[imprisonment_labels != -1])
+        )
         return {
             "charge_accuracy": charge_accuracy,
             "imprisonment_accuracy": imprisonment_accuracy,
             "charge_f1": charge_f1,
             "imprisonment_f1": imprisonment_f1,
+            "predict_imprisonment_mean": predict_imprisonment_mean,
+            "delta_imprisonment": delta_imprisonment,
         }
 
     def train(self):

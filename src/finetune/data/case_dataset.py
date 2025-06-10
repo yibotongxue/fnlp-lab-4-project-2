@@ -33,7 +33,7 @@ class CaseDataset(Dataset):
             text=fact,
             truncation=True,
             padding="max_length",
-            max_length=4096,
+            max_length=512,
             return_tensors="pt",
         )
 

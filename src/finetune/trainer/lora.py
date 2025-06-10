@@ -4,6 +4,7 @@ from peft import get_peft_model, LoraConfig, TaskType
 
 from .base import BaseTrainer
 from ..utils import load_pretrained_models
+from ..model import LegalPredictionModel
 
 
 class LoRATrainer(BaseTrainer):
@@ -16,6 +17,11 @@ class LoRATrainer(BaseTrainer):
             auto_model_kwargs=self.args.extra_model_kwargs,
             auto_tokenizer_kwargs=self.args.extra_tokenizer_kwargs,
         )
+        classifier_model = LegalPredictionModel(
+            function_model,
+            charge_num=self.train_config["charge_num"],
+            imprisonment_num=self.train_config["imprisonment_num"],
+        )
         self.lora_config = LoraConfig(
             r=self.train_config["lora_config"]["rank"],
             lora_alpha=self.train_config["lora_config"]["alpha"],
@@ -24,7 +30,7 @@ class LoRATrainer(BaseTrainer):
             bias="lora_only",
             task_type=TaskType.SEQ_CLS,
         )
-        self.model = get_peft_model(function_model, self.lora_config)
+        self.model = get_peft_model(classifier_model, self.lora_config)
 
 
 if __name__ == "__main__":
@@ -60,7 +66,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--test-data-path", type=str, required=True, help="Path to the test data."
     )
-    parser.add_argument("--model-max-length", type=int, default=4096)
+    parser.add_argument("--model-max-length", type=int, default=512)
     parser.add_argument(
         "--cache-dir",
         type=str,

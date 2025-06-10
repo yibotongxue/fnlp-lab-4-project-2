@@ -4,7 +4,7 @@ from typing import Any, Callable
 
 import torch.nn as nn
 from transformers import (
-    AutoModelForSequenceClassification,
+    AutoModel,
     AutoTokenizer,
     PreTrainedModel,
     PreTrainedTokenizerBase,
@@ -132,7 +132,7 @@ def load_pretrained_models(
     if auto_tokenizer_kwargs is None:
         auto_tokenizer_kwargs = {}
 
-    model = AutoModelForSequenceClassification.from_pretrained(
+    model = AutoModel.from_pretrained(
         model_name_or_path,
         *auto_model_args,
         cache_dir=cache_dir,

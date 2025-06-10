@@ -1,8 +1,11 @@
+from dataclasses import dataclass
+
 import torch
 from torch import nn
 from transformers.modeling_outputs import ModelOutput
 
 
+@dataclass
 class LegalPredictionOutput(ModelOutput):
     charge_logits: torch.FloatTensor = None
     imprisonment_logits: torch.FloatTensor = None
@@ -22,6 +25,7 @@ class LegalPredictionModel(nn.Module):
         self.base_model = base_model
         self.dropout = nn.Dropout(0.1)
         self.charge_classifier = nn.Linear(base_model.config.hidden_size, charge_num)
+        self.config = base_model.config
         self.imprisonment_classifier = nn.Linear(
             base_model.config.hidden_size + charge_num, imprisonment_num
         )
