@@ -2,15 +2,15 @@ import argparse
 
 from src.predictor import ZeroShotPredictor
 from src.utils import save_jsonl
-from src.utils.data_utils import LegalCaseDataSet
+from src.utils.data_utils import LegalCaseDataset
 
 
-def get_data(split: str = "train") -> LegalCaseDataSet:
+def get_data(split: str = "train") -> LegalCaseDataset:
     """Load the legal case dataset."""
     if split == "train":
-        return LegalCaseDataSet("./data/train.jsonl")
+        return LegalCaseDataset("./data/train.jsonl")
     elif split == "test":
-        return LegalCaseDataSet("./data/test.jsonl")
+        return LegalCaseDataset("./data/test.jsonl")
     else:
         raise ValueError("Invalid split. Use 'train' or 'test'.")
 

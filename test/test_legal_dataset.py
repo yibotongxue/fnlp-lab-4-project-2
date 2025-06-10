@@ -1,12 +1,12 @@
 import pytest
 
-from src.utils.data_utils import LegalCaseDataSet
+from src.utils.data_utils import LegalCaseDataset
 
 
 # 定义 fixture 来初始化 LegalDataLoader 实例
 @pytest.fixture
 def train_legal_dataset():
-    return LegalCaseDataSet("./data/train.jsonl")
+    return LegalCaseDataset("./data/train.jsonl")
 
 
 def test_all_cases_loaded(train_legal_dataset):

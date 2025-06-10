@@ -4,19 +4,18 @@ import os
 from dotenv import load_dotenv
 
 from src.predictor import ZeroShotPredictor
-from src.utils import load_jsonl, save_json
-from src.utils.data_utils import LegalCaseDataSet
-from src.utils.dict_utils import robust_dict_from_str
+from src.utils import load_jsonl, robust_dict_from_str, save_json
+from src.utils.data_utils import LegalCaseDataset
 
 load_dotenv()
 
 
-def get_data(split: str = "train") -> LegalCaseDataSet:
+def get_data(split: str = "train") -> LegalCaseDataset:
     """Load the legal case dataset."""
     if split == "train":
-        return LegalCaseDataSet("./data/train.jsonl")
+        return LegalCaseDataset("./data/train.jsonl")
     elif split == "test":
-        return LegalCaseDataSet("./data/test.jsonl")
+        return LegalCaseDataset("./data/test.jsonl")
     else:
         raise ValueError("Invalid split. Use 'train' or 'test'.")
 

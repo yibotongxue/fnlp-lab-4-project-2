@@ -79,7 +79,7 @@ class ChargeLoader:
         return result
 
 
-class LegalCaseDataSet(Dataset):
+class LegalCaseDataset(Dataset):
     def __init__(self, file_path: str):
         assert file_path.endswith(".jsonl"), "File must be a JSONL file"
         if not os.path.exists(file_path):
