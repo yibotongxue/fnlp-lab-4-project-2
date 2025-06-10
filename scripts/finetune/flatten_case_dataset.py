@@ -5,7 +5,9 @@ from src.utils.type_utils import CaseDataDict
 from src.utils.data_utils import ChargeLoader
 
 
-def flatten_cases(raw_cases: list[dict], charge_id_map: dict[str, int]) -> list[dict]:
+def flatten_cases(
+    raw_cases: list[dict], charge_id_map: dict[str, int], is_train: bool = True
+) -> list[dict]:
     flat_samples = []
 
     for case in raw_cases:
@@ -20,6 +22,13 @@ def flatten_cases(raw_cases: list[dict], charge_id_map: dict[str, int]) -> list[
             if name not in outcome_map:
                 continue
             judgment = outcome_map[name]
+            if not is_train:
+                sample = {
+                    "fact": f"【当前被告人：{name}】" + fact,
+                    "defendant": name,
+                }
+                flat_samples.append(sample)
+                continue
             assert (
                 judgment["standard_accusation"] in charge_id_map
             ), f"Standard accusation '{judgment['standard_accusation']}' not found in charge_id_map."
@@ -36,7 +45,11 @@ def flatten_cases(raw_cases: list[dict], charge_id_map: dict[str, int]) -> list[
 
 
 def flatten_jsonl_file(
-    input_path: str, charge_file: str, output_path: str, overwrite: bool = False
+    input_path: str,
+    charge_file: str,
+    output_path: str,
+    overwrite: bool = False,
+    is_train: bool = True,
 ):
     if os.path.exists(output_path) and not overwrite:
         print(f"[INFO] Skipped: {output_path} already exists.")
@@ -45,7 +58,7 @@ def flatten_jsonl_file(
     charge_loader = ChargeLoader(charge_file)
 
     raw_cases = load_jsonl(input_path)
-    flat_samples = flatten_cases(raw_cases, charge_loader.all_charges)
+    flat_samples = flatten_cases(raw_cases, charge_loader.all_charges, is_train)
     save_jsonl(flat_samples, output_path)
     print(f"[INFO] Flattened {len(flat_samples)} samples to {output_path}")
 
@@ -65,6 +78,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--overwrite", action="store_true", help="Overwrite output if exists"
     )
+    parser.add_argument(
+        "--is-train",
+        action="store_true",
+        help="Whether the dataset is for training (default: False)",
+    )
 
     args = parser.parse_args()
-    flatten_jsonl_file(args.input, args.charge, args.output, args.overwrite)
+    flatten_jsonl_file(
+        args.input, args.charge, args.output, args.overwrite, args.is_train
+    )
