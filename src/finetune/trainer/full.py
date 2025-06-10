@@ -68,3 +68,6 @@ if __name__ == "__main__":
 
     trainer = FullTrainer(args, train_config=config["train_config"])
     print("Model and tokenizer initialized successfully.")
+
+    trainer.train()
+    print(trainer.eval())

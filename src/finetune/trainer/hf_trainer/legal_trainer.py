@@ -18,7 +18,11 @@ class LegalTrainer(Trainer):
         super().__init__(*args, **kwargs)
 
     def compute_loss(
-        self, model: LegalPredictionModel, inputs: dict, return_outputs=False
+        self,
+        model: LegalPredictionModel,
+        inputs: dict,
+        return_outputs=False,
+        num_items_in_batch=None,
     ):
         """
         Computes the loss for the model given the inputs.
