@@ -1,11 +1,11 @@
 from typing import override
 
 from ..utils import load_pretrained_models
-from .base import BaseTrainer
+from .multi_task import MultiTaskTrainer
 from ..model import LegalPredictionModel
 
 
-class FullTrainer(BaseTrainer):
+class FullTrainer(MultiTaskTrainer):
     @override
     def init_model(self):
         """Initialize the model with pretrained weights."""

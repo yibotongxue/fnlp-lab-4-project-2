@@ -9,10 +9,12 @@ class CaseDataset(Dataset):
         raw_cases: list[dict],
         tokenizer: PreTrainedTokenizer,
         is_train: bool = True,
+        with_accusation: bool = False,
     ):
         self.raw_cases = raw_cases
         self.tokenizer = tokenizer
-        self.is_train = is_train
+        self.is_train = (is_train,)
+        self.with_accusation = with_accusation
 
     def __len__(self):
         return len(self.raw_cases)
@@ -27,10 +29,14 @@ class CaseDataset(Dataset):
             raise TypeError("Index must be an integer or a slice.")
 
     def _prepare_case(self, case: dict) -> dict:
-        fact = case["fact"]
+        if self.with_accusation:
+            text = case["fact_imprisonment"]
+        else:
+            text = case["fact"]
+        # fact = case["fact"]
 
         encoding = self.tokenizer(
-            text=fact,
+            text=text,
             truncation=True,
             padding="max_length",
             max_length=512,
