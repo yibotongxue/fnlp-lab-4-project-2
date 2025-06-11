@@ -22,6 +22,9 @@ if __name__ == "__main__":
     submission_data = {"id": [], "accusations": [], "imprisonment": []}
     for json_file in os.listdir(os.path.join(output_dir)):
         json_file = os.path.join(output_dir, json_file)
+        if not json_file.endswith(".json"):
+            print(f"Skipping {json_file} as it is not a JSON file.")
+            continue
         data = load_json(json_file)
         solution_outcome = data["input"]["outcomes"]
         submission_outcome = data["result"]
