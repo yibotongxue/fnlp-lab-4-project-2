@@ -34,6 +34,8 @@ def flatten_cases(
             ), f"Standard accusation '{judgment['standard_accusation']}' not found in charge_id_map."
             sample = {
                 "fact": f"【当前被告人：{name}】" + fact,
+                "fact_imprisonment": f"【当前被告人：{name}】，【罪名：{judgment['standard_accusation']}】"
+                + fact,
                 "defendant": name,
                 "charge": judgment["standard_accusation"],
                 "charge_id": charge_id_map[judgment["standard_accusation"]],
