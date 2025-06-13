@@ -59,6 +59,7 @@ class NormalTrainer(BaseTrainer):
                 if self.is_charge
                 else self.train_config["imprisonment_num"]
             ),
+            is_charge=self.args.is_charge,
         )
 
     @override
@@ -109,6 +110,10 @@ class NormalTrainer(BaseTrainer):
         """
         predictions, labels = eval_pred
         predictions = predictions.argmax(axis=-1)
+        if self.is_charge:
+            labels = labels["charge_id"]
+        else:
+            labels = labels["imprisonment"]
         accuracy = self.accuracy_metric.compute(
             predictions=predictions, references=labels
         )
@@ -185,16 +190,3 @@ if __name__ == "__main__":
         )
         imprisonment_trainer.train()
         print(imprisonment_trainer.eval())
-
-    # charge_trainer = NormalTrainer(args, train_config=config["train_config"], is_charge=True)
-    # imprisonment_trainer = NormalTrainer(args, train_config=config["train_config"], is_charge=False)
-    # # trainer = NormalTrainer(args, train_config=config["train_config"])
-    # print("Model and tokenizer initialized successfully.")
-
-    # charge_trainer.train()
-    # print(charge_trainer.eval())
-    # imprisonment_trainer.train()
-    # print(imprisonment_trainer.eval())
-
-    # trainer.train()
-    # print(trainer.eval())

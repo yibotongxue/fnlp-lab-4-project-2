@@ -6,6 +6,7 @@ from transformers import AutoTokenizer
 
 from .base import BaseImprisonmentPredictor
 from ...finetune.model import LegalSinglePredictionModel
+from ...finetune.data import CaseDataset
 
 
 class LawformerImprisonmentPredictor(BaseImprisonmentPredictor):
@@ -62,5 +63,5 @@ class LawformerImprisonmentPredictor(BaseImprisonmentPredictor):
 
             imprisonment_logits = outputs.cpu().numpy()
             imprisonment = np.argmax(imprisonment_logits, axis=1)
-            result[defendant] = [imprisonment]
+            result[defendant] = [CaseDataset._class_to_imprisonment(imprisonment)]
         return result

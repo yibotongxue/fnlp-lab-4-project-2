@@ -5,7 +5,12 @@ from safetensors.torch import load_file
 
 
 class LegalSinglePredictionModel(nn.Module):
-    def __init__(self, base_model: nn.Module, num_classes: int = 321):
+    def __init__(
+        self,
+        base_model: nn.Module,
+        num_classes: int = 321,
+        is_charge: bool = True,
+    ):
         """
         Initializes the LegalPredictionModel with a base model.
 
@@ -15,7 +20,8 @@ class LegalSinglePredictionModel(nn.Module):
         super().__init__()
         self.base_model = base_model
         self.dropout = nn.Dropout(0.1)
-        self.charge_classifier = nn.Linear(base_model.config.hidden_size, num_classes)
+        self.classifier = nn.Linear(base_model.config.hidden_size, num_classes)
+        self.is_charge = is_charge
 
     def forward(
         self,
@@ -36,15 +42,20 @@ class LegalSinglePredictionModel(nn.Module):
         outputs = self.base_model(input_ids=input_ids, attention_mask=attention_mask)
         pooled_output = outputs.pooler_output
         pooled_output = self.dropout(pooled_output)
-        charge_logits = self.charge_classifier(pooled_output)
+        output_logits = self.classifier(pooled_output)
+        if self.is_charge:
+            labels = labels["charge_id"]
+        else:
+            labels = labels["imprisonment"]
         if labels is not None:
             loss_fct = nn.CrossEntropyLoss()
             loss = loss_fct(
-                charge_logits.view(-1, self.charge_classifier.out_features),
+                output_logits.view(-1, self.classifier.out_features),
                 labels.view(-1),
             )
-            return loss, charge_logits
-        return charge_logits
+            output_logits = output_logits.view(-1, self.classifier.out_features)
+            return loss, output_logits
+        return output_logits
 
     @classmethod
     def from_pretrained(
