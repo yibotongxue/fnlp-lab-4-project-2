@@ -1,6 +1,6 @@
 train_config:
-  output_dir: ./output/finetune/imprisonment
-  logging_dir: ./output/finetune/imprisonment/logs
+  output_dir: ./output/finetune/charge
+  logging_dir: ./output/finetune/charge/logs
   learning_rate: 5e-5
   train_batch_size: 8
   eval_batch_size: 8
@@ -10,9 +10,9 @@ train_config:
   eval_steps: 500
   save_strategy: "epoch"
   enable_wandb: false
-  run_name: "imprisonment_run"
-  wandb_project: "imprisonment-prediction"
+  run_name: "charge_run"
+  wandb_project: "charge-prediction"
   extra_model_kwargs: {}
   extra_tokenizer_kwargs: {}
   model_max_length: 512
-  imprisonment_num: 600
+  charge_num: 321
