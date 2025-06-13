@@ -179,7 +179,6 @@ if __name__ == "__main__":
         charge_id_mapping=charge_loader.reverse_charges,
         device=device,
     )
-    results = []
     for i, data in enumerate(legal_data):
         result_to_save = {}
         result_to_save["input"] = data.model_dump()

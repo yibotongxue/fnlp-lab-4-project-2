@@ -51,6 +51,10 @@ class ChargeLoader:
         self.file_path = file_path
 
     @cached_property
+    def charge_num(self) -> int:
+        return len(self.all_charges.keys())
+
+    @cached_property
     def all_charges(self) -> dict[str, int]:
         return self._load_all_charges()
 

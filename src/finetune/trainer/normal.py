@@ -136,11 +136,11 @@ if __name__ == "__main__":
             config = yaml.safe_load(file)
         return config
 
-    parser = argparse.ArgumentParser(description="Full Trainer")
+    parser = argparse.ArgumentParser(description="Normal Trainer")
     parser.add_argument(
         "--config",
         type=str,
-        default="./configs/finetune/full.yaml",
+        default="./configs/finetune/normal.yaml",
         help="Path to the configuration file.",
     )
     parser.add_argument("--model-name-or-path", type=str, required=True)
