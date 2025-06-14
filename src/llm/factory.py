@@ -2,9 +2,14 @@ import os
 
 from .base import BaseLLM
 from .openai import DeepSeekLLM, OpenAILLM, QwenLLM
+from .local_vllm import LocalVLLM
 
 
-def get_llm(model_name: str = "qwen-max", api_key: str = None) -> BaseLLM:
+def get_llm(
+    model_name: str = "qwen-max",
+    api_key: str = None,
+    local_model_name: str = "Qwen/Qwen3-0.6B",
+) -> BaseLLM:
     """
     Factory function to get an instance of a language model based on the model name.
 
@@ -35,6 +40,8 @@ def get_llm(model_name: str = "qwen-max", api_key: str = None) -> BaseLLM:
         return DeepSeekLLM(api_key=api_key, model_name=model_name)
     elif model_name in qwen_model_names:
         return QwenLLM(api_key=api_key, model_name=model_name)
+    elif model_name == "local-vllm":
+        return LocalVLLM(model_name=local_model_name)
     else:
         raise ValueError(
             f"Unsupported model name: {model_name}. Supported models are: {openai_model_names + deepseek_model_names + qwen_model_names}."
