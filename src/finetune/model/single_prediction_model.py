@@ -43,11 +43,11 @@ class LegalSinglePredictionModel(nn.Module):
         pooled_output = outputs.pooler_output
         pooled_output = self.dropout(pooled_output)
         output_logits = self.classifier(pooled_output)
-        if self.is_charge:
-            labels = labels["charge_id"]
-        else:
-            labels = labels["imprisonment"]
         if labels is not None:
+            if self.is_charge:
+                labels = labels["charge_id"]
+            else:
+                labels = labels["imprisonment"]
             loss_fct = nn.CrossEntropyLoss()
             loss = loss_fct(
                 output_logits.view(-1, self.classifier.out_features),

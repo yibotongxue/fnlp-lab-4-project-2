@@ -47,6 +47,7 @@ def save_json(data: dict, file_path: str) -> None:
     """
     if os.path.exists(file_path):
         os.remove(file_path)
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
     with open(file_path, "w", encoding="utf-8") as file:
         json.dump(data, file, ensure_ascii=False, indent=4)
 
@@ -59,6 +60,7 @@ def save_jsonl(data: list[dict], file_path: str) -> None:
         data (list[dict]): The list of dictionaries to save.
         file_path (str): The path where the JSON Lines file will be saved.
     """
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
     if os.path.exists(file_path):
         os.remove(file_path)
     with open(file_path, "w", encoding="utf-8") as file:

@@ -82,7 +82,7 @@ def main():
     parser.add_argument(
         "--charge-model-path",
         type=str,
-        required=True,
+        required=False,
         help="Path to the pre-trained Lawformer model",
     )
     parser.add_argument(
@@ -112,7 +112,7 @@ def main():
     parser.add_argument(
         "--imprisonment-model-path",
         type=str,
-        required=True,
+        required=False,
         help="Path to the pre-trained Lawformer model for imprisonment prediction",
     )
     parser.add_argument(

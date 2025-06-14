@@ -5,7 +5,7 @@ from .base import BaseImprisonmentPredictor
 
 class AllZeroImprisonmentPredictor(BaseImprisonmentPredictor):
     @override
-    def predict_imprisonment(
+    def predict(
         self, fact: str, defendants: list[str], charge_dict: dict[str, list[str]]
     ) -> dict:
         # Implement the logic to predict imprisonment using Lawformer

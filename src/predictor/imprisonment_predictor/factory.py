@@ -20,9 +20,7 @@ def get_imprisonment_predictor(
         BaseImprisonmentPredictor: An instance of the specified imprisonment predictor.
     """
     if predictor_type == "zero_shot":
-        return ZeroShotImprisonmentPredictor(
-            args.imprisonment_predictor, args.imprisonment_llm
-        )
+        return ZeroShotImprisonmentPredictor(args.imprisonment_llm)
     elif predictor_type == "lawformer":
         return LawformerImprisonmentPredictor(
             args.imprisonment_model_path,
