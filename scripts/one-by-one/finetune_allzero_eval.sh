@@ -2,13 +2,12 @@
 
 python -m src.predictor.one_by_one \
     --charge-predictor lawformer \
-    --imprisonment-predictor zero_shot \
+    --imprisonment-predictor all_zero \
     --charge-model-path ./checkpoints/finetune/charge-3epoch-checkpoint \
     --charge-base-model-name thunlp/Lawformer \
     --charge-file ./data/charges.json \
-    --imprisonment-llm qwen-max \
     --device cuda \
     --split train \
-    --output-dir ./output/one_by_one/finetune_zeroshot_eval \
+    --output-dir ./output/one_by_one/finetune_allzero_eval \
     --start-index 0 \
-    --train-size 10
+    --train-size 1000

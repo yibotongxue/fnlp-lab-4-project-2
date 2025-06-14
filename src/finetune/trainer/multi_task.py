@@ -43,6 +43,9 @@ class MultiTaskTrainer(BaseTrainer):
             "push_to_hub": False,
             "report_to": "none",
             "logging_steps": 10,
+            "fp16": True,
+            "dataloader_num_workers": 4,
+            "gradient_accumulation_steps": 2,
         }
         if self.args.enable_wandb:
             os.environ["WANDB_PROJECT"] = self.train_config.get(

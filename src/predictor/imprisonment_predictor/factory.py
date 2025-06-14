@@ -4,6 +4,7 @@ from .base import BaseImprisonmentPredictor
 from .zero_shot import ZeroShotImprisonmentPredictor
 from .lawformer import LawformerImprisonmentPredictor
 from .all_zero import AllZeroImprisonmentPredictor
+from .most_common import MostCommonImprisonmentPredictor
 
 
 def get_imprisonment_predictor(
@@ -30,5 +31,7 @@ def get_imprisonment_predictor(
         )
     elif predictor_type == "all_zero":
         return AllZeroImprisonmentPredictor()
+    elif predictor_type == "most_common":
+        return MostCommonImprisonmentPredictor(args.charge_imprisonment_dict_path)
     else:
         raise ValueError(f"Unknown imprisonment predictor type: {predictor_type}")

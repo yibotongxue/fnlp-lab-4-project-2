@@ -128,6 +128,12 @@ def main():
         help="Number of imprisonment classes (default is 600)",
     )
     parser.add_argument(
+        "--charge-imprisonment-dict-path",
+        type=str,
+        default="./data/charge_imprisonment_dict.json",
+        help="Path to the charge imprisonment dictionary file",
+    )
+    parser.add_argument(
         "--device",
         type=str,
         default="cpu",

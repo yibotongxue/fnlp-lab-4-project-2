@@ -2,13 +2,13 @@
 
 python -m src.predictor.one_by_one \
     --charge-predictor lawformer \
-    --imprisonment-predictor zero_shot \
+    --imprisonment-predictor most_common \
     --charge-model-path ./checkpoints/finetune/charge-3epoch-checkpoint \
     --charge-base-model-name thunlp/Lawformer \
     --charge-file ./data/charges.json \
-    --imprisonment-llm qwen-max \
+    --charge-imprisonment-dict-path ./data/charge_imprisonment_dict.json \
     --device cuda \
     --split train \
-    --output-dir ./output/one_by_one/finetune_zeroshot_eval \
-    --start-index 0 \
-    --train-size 10
+    --output-dir ./output/one_by_one/finetune_mostcommon_eval \
+    --start-index 9000 \
+    --train-size 1000

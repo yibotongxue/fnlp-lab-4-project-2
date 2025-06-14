@@ -8,7 +8,6 @@ class AllZeroImprisonmentPredictor(BaseImprisonmentPredictor):
     def predict(
         self, fact: str, defendants: list[str], charge_dict: dict[str, list[str]]
     ) -> dict:
-        # Implement the logic to predict imprisonment using Lawformer
         result = {}
         for defendant in defendants:
             result[defendant] = []
