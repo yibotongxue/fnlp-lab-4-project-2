@@ -1,6 +1,8 @@
 import os
 from functools import cached_property
+from typing import Any
 
+import numpy as np
 from torch.utils.data import Dataset
 
 from .json_util import load_json, load_jsonl
@@ -8,15 +10,25 @@ from .type_utils import CaseDataDict
 
 
 class ArticleLoader:
-    def __init__(self, file_path: str):
+    def __init__(self, file_path: str, embed_path: str | None = None):
         assert file_path.endswith(".json"), "File must be a JSON file"
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"The file {file_path} does not exist.")
         self.file_path = file_path
+        self.embed_path = embed_path
+
+    @cached_property
+    def embed_data(self) -> dict[str, Any]:
+        return load_jsonl(self.embed_path)
 
     @cached_property
     def all_articles(self) -> dict[str, str]:
         return self._load_all_articles()
+
+    @cached_property
+    def embedding_matrix(self) -> np.ndarray:
+        embedding_list = [r["embedding"] for r in self.embed_data]
+        return np.array(embedding_list).astype(np.float32)
 
     def load_article(self, article_id: str) -> str:
         if article_id not in self.all_articles:
