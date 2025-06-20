@@ -8,6 +8,7 @@ from .hf_trainer import LegalTrainer
 from .base import BaseTrainer
 from ..data import CaseDataset, CustomDataCollator
 from ...utils import load_jsonl
+from ...utils.imprisonment_mapper import get_imprisonment_mapper
 
 
 class MultiTaskTrainer(BaseTrainer):
@@ -25,7 +26,12 @@ class MultiTaskTrainer(BaseTrainer):
         self.test_dataset = CaseDataset(
             test_raw_cases[-1000:], self.tokenizer, is_train=True
         )
-        self.data_collator = CustomDataCollator()
+        self.imprisonment_mapper = get_imprisonment_mapper(
+            self.train_config["imprisonment_mapper_config"]
+        )
+        self.data_collator = CustomDataCollator(
+            imprisonment_mapper=self.imprisonment_mapper
+        )
 
     @override
     def init_trainer(self):

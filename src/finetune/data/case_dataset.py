@@ -33,7 +33,6 @@ class CaseDataset(Dataset):
             text = case["fact_imprisonment"]
         else:
             text = case["fact"]
-        # fact = case["fact"]
 
         encoding = self.tokenizer(
             text=text,
@@ -53,7 +52,7 @@ class CaseDataset(Dataset):
             }
 
         charge_id = case.get("charge_id", -1)
-        imprisonment = self._imprisonment_to_class(case.get("imprisonment", -1))
+        imprisonment = case.get("imprisonment", -1)
 
         return {
             "input_ids": input_ids,
@@ -63,21 +62,3 @@ class CaseDataset(Dataset):
                 "imprisonment": torch.tensor(imprisonment, dtype=torch.long),
             },
         }
-
-    @staticmethod
-    def _imprisonment_to_class(imprisonment: int) -> int:
-        if imprisonment <= 47:
-            return imprisonment
-        return 48 + (imprisonment - 48) // 6
-
-    @staticmethod
-    def _class_to_imprisonment(class_id: int) -> int:
-        if class_id <= 47:
-            return class_id
-        return 48 + (class_id - 48) * 6
-
-    @staticmethod
-    def imprisonment_class_cnt() -> int:
-        # total up of imprisonment is 180
-        # turn to class is
-        return 74

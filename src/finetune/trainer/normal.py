@@ -9,6 +9,7 @@ from ..utils import load_pretrained_models
 from ..model import LegalSinglePredictionModel
 from ..data import CaseDataset, CustomDataCollator
 from ...utils import load_jsonl
+from ...utils.imprisonment_mapper import get_imprisonment_mapper
 
 
 class NormalTrainer(BaseTrainer):
@@ -40,7 +41,12 @@ class NormalTrainer(BaseTrainer):
             is_train=True,
             with_accusation=(not self.is_charge),
         )
-        self.data_collator = CustomDataCollator()
+        self.imprisonment_mapper = get_imprisonment_mapper(
+            self.train_config["imprisonment_mapper_config"]
+        )
+        self.data_collator = CustomDataCollator(
+            imprisonment_mapper=self.imprisonment_mapper
+        )
 
     @override
     def init_model(self):
@@ -128,21 +134,8 @@ class NormalTrainer(BaseTrainer):
 
 if __name__ == "__main__":
     from typing import Any
-    import yaml
 
-    def load_config(config_path: str) -> dict[str, Any]:
-        """
-        Load the configuration file.
-
-        Args:
-            config_path (str): Path to the configuration file.
-
-        Returns:
-            dict[str, Any]: Loaded configuration.
-        """
-        with open(config_path) as file:
-            config = yaml.safe_load(file)
-        return config
+    from ...utils import load_config
 
     parser = argparse.ArgumentParser(description="Normal Trainer")
     parser.add_argument(

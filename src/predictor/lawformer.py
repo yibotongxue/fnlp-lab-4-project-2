@@ -6,6 +6,10 @@ from transformers import AutoTokenizer
 
 from .base import BasePredictor
 from ..utils.type_utils import OutcomeDict
+from ..utils.imprisonment_mapper import (
+    BaseImprisonmentMapper,
+    IdentityImprisonmentMapper,
+)
 from ..finetune.model import LegalPredictionModel
 
 
@@ -18,6 +22,7 @@ class LawformerPredictor(BasePredictor):
         imprisonment_num: int = 600,
         device: torch.device = torch.device("cpu"),
         charge_id_mapping: dict = None,
+        imprisonment_mapper: BaseImprisonmentMapper = None,
     ):
         """
         Initializes the LawformerPredictor with a pre-trained model.
@@ -41,6 +46,10 @@ class LawformerPredictor(BasePredictor):
         self.charge_id_mapping = charge_id_mapping if charge_id_mapping else {}
         self.model.eval()
         self.model.to(self.device)
+        if imprisonment_mapper is None:
+            self.imprisonment_mapper = IdentityImprisonmentMapper()
+        else:
+            self.imprisonment_mapper = imprisonment_mapper
 
     @override
     def predict_judgment(self, fact: str, defendants: list[str]) -> list[OutcomeDict]:
@@ -90,8 +99,9 @@ class LawformerPredictor(BasePredictor):
 if __name__ == "__main__":
     import argparse
     import os
-    from ..utils.json_util import save_json
+    from ..utils import save_json, load_config
     from ..utils.data_utils import LegalCaseDataset, ChargeLoader
+    from ..utils.imprisonment_mapper import get_imprisonment_mapper
 
     parser = argparse.ArgumentParser(description="Lawformer Predictor")
     parser.add_argument(
@@ -138,6 +148,12 @@ if __name__ == "__main__":
         help="Path to the charge list file",
     )
     parser.add_argument(
+        "--imprisonment-mapper-config",
+        type=str,
+        required=False,
+        help="Path of the config file of imprisonment mapper",
+    )
+    parser.add_argument(
         "--device",
         type=str,
         default="cpu",
@@ -173,11 +189,15 @@ if __name__ == "__main__":
     else:
         legal_data = legal_data[start_index:]
     charge_loader = ChargeLoader(args.charge_file)
+    imprisonment_mapper = get_imprisonment_mapper(
+        load_config(args.imprisonment_mapper_config)["imprisonment_mapper_config"]
+    )
     predictor = LawformerPredictor(
         model_path,
         base_model_name,
         charge_id_mapping=charge_loader.reverse_charges,
         device=device,
+        imprisonment_mapper=imprisonment_mapper,
     )
     for i, data in enumerate(legal_data):
         result_to_save = {}

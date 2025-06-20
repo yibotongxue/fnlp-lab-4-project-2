@@ -6,7 +6,10 @@ from transformers import AutoTokenizer
 
 from .base import BaseImprisonmentPredictor
 from ...finetune.model import LegalSinglePredictionModel
-from ...finetune.data import CaseDataset
+from ...utils.imprisonment_mapper import (
+    BaseImprisonmentMapper,
+    IdentityImprisonmentMapper,
+)
 
 
 class LawformerImprisonmentPredictor(BaseImprisonmentPredictor):
@@ -16,6 +19,7 @@ class LawformerImprisonmentPredictor(BaseImprisonmentPredictor):
         base_model_name: str,
         imprisonment_num: int = 321,
         device: torch.device = torch.device("cpu"),
+        imprisonment_mapper: BaseImprisonmentMapper = None,
     ):
         """
         Initializes the LawformerChargePredictor with a pre-trained model.
@@ -37,6 +41,10 @@ class LawformerImprisonmentPredictor(BaseImprisonmentPredictor):
         self.device = device
         self.imprisonment_model.eval()
         self.imprisonment_model.to(self.device)
+        if imprisonment_mapper is None:
+            self.imprisonment_mapper = IdentityImprisonmentMapper()
+        else:
+            self.imprisonment_mapper = imprisonment_mapper
 
     @override
     def predict(
@@ -63,5 +71,7 @@ class LawformerImprisonmentPredictor(BaseImprisonmentPredictor):
 
             imprisonment_logits = outputs.cpu().numpy()
             imprisonment = np.argmax(imprisonment_logits, axis=1)
-            result[defendant] = [CaseDataset._class_to_imprisonment(imprisonment)]
+            result[defendant] = [
+                self.imprisonment_mapper.label2imprisonment(imprisonment)
+            ]
         return result

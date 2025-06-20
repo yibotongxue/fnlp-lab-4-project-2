@@ -12,7 +12,7 @@ class BaseImprisonmentMapper(ABC):
         pass
 
 
-class IdentifyImprisonmentMapper(BaseImprisonmentMapper):
+class IdentityImprisonmentMapper(BaseImprisonmentMapper):
     @override
     def imprisonment2label(self, imprisonment: int) -> int:
         return imprisonment
@@ -58,3 +58,17 @@ class IntervalImprisonmentMapper(BaseImprisonmentMapper):
             self.lower_bound
         ), f"label should be not less than zero and less than length of represent list, which length is {len(self.represent_list)}, but now the label is {label}"
         return self.represent_list[label]
+
+
+def get_imprisonment_mapper(imprisonment_mapper_config: dict) -> BaseImprisonmentMapper:
+    if imprisonment_mapper_config["imprisonment_mapper_type"] == "identity":
+        return IdentityImprisonmentMapper()
+    elif imprisonment_mapper_config["imprisonment_mapper_type"] == "interval":
+        return IntervalImprisonmentMapper(
+            lower_bound=imprisonment_mapper_config["lower_bound"],
+            represent_list=imprisonment_mapper_config["represent_list"],
+        )
+    else:
+        raise ValueError(
+            f"Unsupported imprisonment mapper type {imprisonment_mapper_config['imprisonment_mapper_type']}"
+        )

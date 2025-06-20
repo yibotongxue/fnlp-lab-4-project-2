@@ -162,6 +162,12 @@ def main():
         help="Number of imprisonment classes (default is 600)",
     )
     parser.add_argument(
+        "--imprisonment-mapper-config",
+        type=str,
+        required=False,
+        help="Path of the config file of imprisonment mapper",
+    )
+    parser.add_argument(
         "--charge-imprisonment-dict-path",
         type=str,
         default="./data/charge_imprisonment_dict.json",

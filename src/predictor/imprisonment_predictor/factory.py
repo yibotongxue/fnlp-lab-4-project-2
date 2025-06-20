@@ -5,6 +5,8 @@ from .zero_shot import ZeroShotImprisonmentPredictor
 from .lawformer import LawformerImprisonmentPredictor
 from .all_zero import AllZeroImprisonmentPredictor
 from .most_common import MostCommonImprisonmentPredictor
+from ...utils import load_config
+from ...utils.imprisonment_mapper import get_imprisonment_mapper
 
 
 def get_imprisonment_predictor(
@@ -23,11 +25,15 @@ def get_imprisonment_predictor(
     if predictor_type == "zero_shot":
         return ZeroShotImprisonmentPredictor(args.imprisonment_llm)
     elif predictor_type == "lawformer":
+        imprisonment_mapper = get_imprisonment_mapper(
+            load_config(args.imprisonment_mapper_config)["imprisonment_mapper_config"]
+        )
         return LawformerImprisonmentPredictor(
             args.imprisonment_model_path,
             args.imprisonment_base_model_name,
             imprisonment_num=args.imprisonment_num,
             device=args.device,
+            imprisonment_mapper=imprisonment_mapper,
         )
     elif predictor_type == "all_zero":
         return AllZeroImprisonmentPredictor()

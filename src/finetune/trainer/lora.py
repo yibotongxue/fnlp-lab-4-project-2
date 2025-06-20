@@ -35,22 +35,8 @@ class LoRATrainer(BaseTrainer):
 
 if __name__ == "__main__":
     import argparse
-    from typing import Any
-    import yaml
 
-    def load_config(config_path: str) -> dict[str, Any]:
-        """
-        Load the configuration file.
-
-        Args:
-            config_path (str): Path to the configuration file.
-
-        Returns:
-            dict[str, Any]: Loaded configuration.
-        """
-        with open(config_path) as file:
-            config = yaml.safe_load(file)
-        return config
+    from ...utils import load_config
 
     parser = argparse.ArgumentParser(description="Full Trainer")
     parser.add_argument(
