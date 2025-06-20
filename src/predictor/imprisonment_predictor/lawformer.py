@@ -60,7 +60,7 @@ class LawformerImprisonmentPredictor(BaseImprisonmentPredictor):
         result = {}
         for _, defendant in enumerate(defendants):
             inputs = self.imprisonment_tokenizer(
-                f"【当前被告人：{defendant}】，【罪名：{charge_dict[defendant[0]]}】"
+                f"【当前被告人：{defendant}】，【罪名：{charge_dict[defendant]}】"
                 + fact,
                 return_tensors="pt",
                 padding=True,
@@ -70,8 +70,13 @@ class LawformerImprisonmentPredictor(BaseImprisonmentPredictor):
                 outputs = self.imprisonment_model(**inputs)
 
             imprisonment_logits = outputs.cpu().numpy()
-            imprisonment = np.argmax(imprisonment_logits, axis=1)
+            imprisonment = np.argmax(imprisonment_logits, axis=1)[0]
             result[defendant] = [
-                self.imprisonment_mapper.label2imprisonment(imprisonment)
+                {
+                    "standard_accusation": charge_dict[defendant][0],
+                    "imprisonment": self.imprisonment_mapper.label2imprisonment(
+                        imprisonment
+                    ),
+                }
             ]
         return result

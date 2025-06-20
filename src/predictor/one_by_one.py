@@ -49,6 +49,7 @@ def main():
     import os
 
     from dotenv import load_dotenv
+    from tqdm import tqdm
 
     from .charge_predictor import get_charge_predictor
     from .imprisonment_predictor import get_imprisonment_predictor
@@ -218,7 +219,8 @@ def main():
         legal_data = legal_data[args.start_index : args.start_index + args.train_size]
     else:
         legal_data = legal_data[args.start_index :]
-    for i, data in enumerate(legal_data):
+    for i in tqdm(range(len(legal_data)), "Legal Judgement Predition"):
+        data = legal_data[i]
         result_to_save = {}
         result_to_save["input"] = data.model_dump()
         result = predictor.predict_judgment(fact=data.fact, defendants=data.defendants)
@@ -227,7 +229,6 @@ def main():
             result_to_save,
             os.path.join(args.output_dir, f"{i + args.start_index}.json"),
         )
-        print(f"Processed case {i + 1}/{len(legal_data)}")
     print(f"Results saved to {args.output_dir}")
 
 

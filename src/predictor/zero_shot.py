@@ -46,6 +46,7 @@ if __name__ == "__main__":
     import os
 
     from dotenv import load_dotenv
+    from tqdm import tqdm
 
     from ..llm import get_llm
     from ..utils import save_json
@@ -111,7 +112,8 @@ if __name__ == "__main__":
     print(f"Loaded {len(legal_data)} cases from the dataset.")
     llm = get_llm(model_name=model_name)
     zero_shot_predictor = ZeroShotPredictor(llm)
-    for i, data in enumerate(legal_data):
+    for i in tqdm(range(len(legal_data)), "Legal Judgement Predition"):
+        data = legal_data[i]
         result_to_save = {}
         result_to_save["input"] = data.model_dump()
         prompt = zero_shot_predictor.build_prompt(

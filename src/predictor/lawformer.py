@@ -99,6 +99,7 @@ class LawformerPredictor(BasePredictor):
 if __name__ == "__main__":
     import argparse
     import os
+    from tqdm import tqdm
     from ..utils import save_json, load_config
     from ..utils.data_utils import LegalCaseDataset, ChargeLoader
     from ..utils.imprisonment_mapper import get_imprisonment_mapper
@@ -199,11 +200,10 @@ if __name__ == "__main__":
         device=device,
         imprisonment_mapper=imprisonment_mapper,
     )
-    for i, data in enumerate(legal_data):
+    for i, data in tqdm(enumerate(legal_data), "Legal Judgement Predition"):
         result_to_save = {}
         result_to_save["input"] = data.model_dump()
         result = predictor.predict_judgment(fact=data.fact, defendants=data.defendants)
         result_to_save["result"] = [outcome.model_dump() for outcome in result]
         save_json(result_to_save, os.path.join(output_dir, f"{i + start_index}.json"))
-        print(f"Processed case {i + 1}/{len(legal_data)}")
     print(f"Results saved to {output_dir}")

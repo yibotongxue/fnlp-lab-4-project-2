@@ -25,16 +25,14 @@ class CustomDataCollator:
         # 如果是训练集，包含标签
         if "label" in features[0]:
             charge_ids = torch.stack([f["label"]["charge_id"] for f in features])
-            imprisonments = torch.stack(
-                torch.tensor(
-                    [
-                        self.imprisonment_mapper.imprisonment2label(
-                            f["label"]["imprisonment"]
-                        )[0]
-                        for f in features
-                    ],
-                    dtype=torch.long,
-                )
+            imprisonments = torch.tensor(
+                [
+                    self.imprisonment_mapper.imprisonment2label(
+                        f["label"]["imprisonment"]
+                    )
+                    for f in features
+                ],
+                dtype=torch.long,
             )
             return {
                 "input_ids": input_ids,
