@@ -3,6 +3,9 @@ from argparse import Namespace
 from .base import BaseChargePredictor
 from .zero_shot import ZeroShotChargePredictor
 from .lawformer import LawformerChargePredictor
+from .refine import RefineChargePredictor
+from .multiple_predictor import get_multiple_charge_predictor
+from .refiner import get_refiner
 from ...utils.data_utils import ChargeLoader
 
 
@@ -28,5 +31,11 @@ def get_charge_predictor(predictor_type: str, args: Namespace) -> BaseChargePred
             charge_id_mapping=charge_loader.reverse_charges,
             device=args.device,
         )
+    elif predictor_type == "refine":
+        multiple_predictor = get_multiple_charge_predictor(
+            args.multiple_predictor_type, args
+        )
+        refiner = get_refiner(args.refiner_type, args)
+        return RefineChargePredictor(refiner, multiple_predictor)
     else:
         raise ValueError(f"Unknown charge predictor type: {predictor_type}")

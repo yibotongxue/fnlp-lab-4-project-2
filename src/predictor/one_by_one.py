@@ -98,6 +98,40 @@ def main():
         help="Path to the charge list file",
     )
     parser.add_argument(
+        "--multiple-predictor-type",
+        type=str,
+        required=False,
+        help="Type of multiple predictor",
+    )
+    parser.add_argument(
+        "--candidate-cnt", type=int, required=False, help="Count of candidates"
+    )
+    parser.add_argument(
+        "--multiple-charge-model-path",
+        type=str,
+        required=False,
+        help="Path to the pre-trained Lawformer model",
+    )
+    parser.add_argument(
+        "--multiple-charge-base-model-name",
+        type=str,
+        default="bert-base-uncased",
+        help="Name of the base model to use",
+    )
+    parser.add_argument(
+        "--multiple-device",
+        type=str,
+        default="cpu",
+        choices=["cpu", "cuda"],
+        help="Device to run the model on (cpu or cuda)",
+    )
+    parser.add_argument(
+        "--refiner-type", type=str, required=False, help="Type of refiner"
+    )
+    parser.add_argument(
+        "--refiner-llm", type=str, required=False, help="LLM for refiner"
+    )
+    parser.add_argument(
         "--imprisonment-predictor",
         type=str,
         required=True,

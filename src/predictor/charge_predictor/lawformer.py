@@ -1,11 +1,9 @@
 from typing import override
 
-import numpy as np
 import torch
-from transformers import AutoTokenizer
 
 from .base import BaseChargePredictor
-from ...finetune.model import LegalSinglePredictionModel
+from .multiple_predictor import LawformerMultipleChargePredictor
 
 
 class LawformerChargePredictor(BaseChargePredictor):
@@ -27,18 +25,14 @@ class LawformerChargePredictor(BaseChargePredictor):
             charge_id_mapping (dict, optional): Mapping from charge IDs to human-readable names.
         """
         super().__init__()
-        self.charge_model = LegalSinglePredictionModel.from_pretrained(
-            safetensors_path=f"{charge_model_path}/model.safetensors",
+        self.multiple_predictor = LawformerMultipleChargePredictor(
+            candidate_cnt=1,
+            charge_model_path=charge_model_path,
             base_model_name=base_model_name,
-            num_classes=charge_num,
+            charge_num=charge_num,
+            device=device,
+            charge_id_mapping=charge_id_mapping,
         )
-        self.charge_tokenizer = AutoTokenizer.from_pretrained(
-            charge_model_path, use_fast=True
-        )
-        self.device = device
-        self.charge_id_mapping = charge_id_mapping if charge_id_mapping else {}
-        self.charge_model.eval()
-        self.charge_model.to(self.device)
 
     @override
     def predict(self, fact: str, defendants: list[str]) -> dict[str, list[str]]:
@@ -49,19 +43,7 @@ class LawformerChargePredictor(BaseChargePredictor):
         Returns:
             dict: A dictionary where keys are defendant names and values are lists of predicted charges.
         """
-        result = {}
-        for _, defendant in enumerate(defendants):
-            inputs = self.charge_tokenizer(
-                f"【当前被告人：{defendant}】" + fact,
-                return_tensors="pt",
-                padding=True,
-                truncation=True,
-            ).to(self.device)
-            with torch.no_grad():
-                outputs = self.charge_model(**inputs)
-
-            charge_logits = outputs.cpu().numpy()
-            charge_id = np.argmax(charge_logits, axis=1)
-            charge_name = self.charge_id_mapping.get(charge_id[0], "Unknown Charge")
-            result[defendant] = [charge_name]
+        result = self.multiple_predictor.predict(fact, defendants)
+        for key in result.keys():
+            result[key] = result[key][0]
         return result
