@@ -1,4 +1,5 @@
 import argparse
+import random
 from typing import override, Any
 import os
 
@@ -6,7 +7,6 @@ from transformers import TrainingArguments, Trainer
 
 from .base import BaseTrainer
 from ..utils import load_pretrained_models
-from ..model import LegalSinglePredictionModel
 from ..data import CaseDataset, CustomDataCollator
 from ...utils import load_jsonl
 from ...utils.imprisonment_mapper import get_imprisonment_mapper
@@ -26,9 +26,10 @@ class NormalTrainer(BaseTrainer):
     def init_datasets(self):
         """Initialize the datasets."""
         train_data_path = self.args.train_data_path
-        test_data_path = self.args.test_data_path
+        # test_data_path = self.args.test_data_path
         train_raw_cases = load_jsonl(train_data_path)
-        test_raw_cases = load_jsonl(test_data_path)
+        random.shuffle(train_raw_cases)
+        # test_raw_cases = load_jsonl(test_data_path)
         self.train_dataset = CaseDataset(
             train_raw_cases[:-1000],
             self.tokenizer,
@@ -36,7 +37,7 @@ class NormalTrainer(BaseTrainer):
             with_accusation=(not self.is_charge),
         )
         self.test_dataset = CaseDataset(
-            test_raw_cases[-1000:],
+            train_raw_cases[-1000:],
             self.tokenizer,
             is_train=True,
             with_accusation=(not self.is_charge),
@@ -51,21 +52,13 @@ class NormalTrainer(BaseTrainer):
     @override
     def init_model(self):
         """Initialize the model with pretrained weights."""
-        base_model, self.tokenizer = load_pretrained_models(
+        self.model, self.tokenizer = load_pretrained_models(
             self.args.model_name_or_path,
             model_max_length=self.args.model_max_length,
             cache_dir=self.args.cache_dir,
+            is_classification=True,
             auto_model_kwargs=self.args.extra_model_kwargs,
             auto_tokenizer_kwargs=self.args.extra_tokenizer_kwargs,
-        )
-        self.model = LegalSinglePredictionModel(
-            base_model,
-            num_classes=(
-                self.train_config["charge_num"]
-                if self.is_charge
-                else self.train_config["imprisonment_num"]
-            ),
-            is_charge=self.args.is_charge,
         )
 
     @override
@@ -137,6 +130,21 @@ if __name__ == "__main__":
 
     from ...utils import load_config
 
+    def parse_dict_arg(arg_values):
+        kwargs = {}
+        for arg in arg_values:
+            if "=" in arg:
+                key, value = arg.split("=", 1)
+                try:
+                    # Attempt to convert to float or int if possible
+                    value = float(value) if "." in value else int(value)
+                except ValueError:
+                    pass  # Keep as string if conversion fails
+                kwargs[key] = value
+            else:
+                print(f"Warning: Ignoring malformed key-value pair: {arg}")
+        return kwargs
+
     parser = argparse.ArgumentParser(description="Normal Trainer")
     parser.add_argument(
         "--config",
@@ -169,6 +177,11 @@ if __name__ == "__main__":
         help="Whether to train the charge prediction model (default: True, for imprisonment prediction if False).",
     )
     args = parser.parse_args()
+
+    if args.extra_model_kwargs:
+        args.extra_model_kwargs = parse_dict_arg(args.extra_model_kwargs)
+    if args.extra_tokenizer_kwargs:
+        args.extra_tokenizer_kwargs = parse_dict_arg(args.extra_tokenizer_kwargs)
 
     config = load_config(args.config)
 

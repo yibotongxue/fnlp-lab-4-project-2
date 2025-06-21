@@ -5,6 +5,7 @@ from typing import Any, Callable
 import torch.nn as nn
 from transformers import (
     AutoModel,
+    AutoModelForSequenceClassification,
     AutoTokenizer,
     PreTrainedModel,
     PreTrainedTokenizerBase,
@@ -118,6 +119,7 @@ def load_pretrained_models(
     /,
     model_max_length: int = 512,
     cache_dir: str | os.PathLike | None = None,
+    is_classification: bool = False,
     *,
     auto_model_args: tuple[Any, ...] = (),
     auto_model_kwargs: dict[str, Any] | None = None,
@@ -132,12 +134,20 @@ def load_pretrained_models(
     if auto_tokenizer_kwargs is None:
         auto_tokenizer_kwargs = {}
 
-    model = AutoModel.from_pretrained(
-        model_name_or_path,
-        *auto_model_args,
-        cache_dir=cache_dir,
-        **auto_model_kwargs,
-    )
+    if not is_classification:
+        model = AutoModel.from_pretrained(
+            model_name_or_path,
+            *auto_model_args,
+            cache_dir=cache_dir,
+            **auto_model_kwargs,
+        )
+    else:
+        model = AutoModelForSequenceClassification.from_pretrained(
+            model_name_or_path,
+            *auto_model_args,
+            cache_dir=cache_dir,
+            **auto_model_kwargs,
+        )
     tokenizer = AutoTokenizer.from_pretrained(
         model_name_or_path,
         *auto_tokenizer_args,
