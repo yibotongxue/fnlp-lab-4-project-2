@@ -46,7 +46,8 @@ class NormalTrainer(BaseTrainer):
             self.train_config["imprisonment_mapper_config"]
         )
         self.data_collator = CustomDataCollator(
-            imprisonment_mapper=self.imprisonment_mapper
+            imprisonment_mapper=self.imprisonment_mapper,
+            is_charge=self.is_charge,
         )
 
     @override

@@ -6,4 +6,5 @@ python -m src.finetune.trainer.normal \
     --train-data-path ./data/train_flattened.jsonl \
     --test-data-path ./data/train_flattened.jsonl \
     --model-max-length 512 \
-    --enable-wandb
+    --enable-wandb \
+    --extra-model-kwargs num_labels=24
