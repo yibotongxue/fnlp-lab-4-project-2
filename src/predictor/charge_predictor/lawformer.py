@@ -10,7 +10,6 @@ class LawformerChargePredictor(BaseChargePredictor):
     def __init__(
         self,
         charge_model_path: str,
-        base_model_name: str,
         charge_num: int = 321,
         device: torch.device = torch.device("cpu"),
         charge_id_mapping: dict = None,

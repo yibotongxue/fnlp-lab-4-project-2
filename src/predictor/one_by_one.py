@@ -87,12 +87,6 @@ def main():
         help="Path to the pre-trained Lawformer model",
     )
     parser.add_argument(
-        "--charge-base-model-name",
-        type=str,
-        default="bert-base-uncased",
-        help="Name of the base model to use",
-    )
-    parser.add_argument(
         "--charge-file",
         type=str,
         default="./data/charges.json",
@@ -112,12 +106,6 @@ def main():
         type=str,
         required=False,
         help="Path to the pre-trained Lawformer model",
-    )
-    parser.add_argument(
-        "--multiple-charge-base-model-name",
-        type=str,
-        default="bert-base-uncased",
-        help="Name of the base model to use",
     )
     parser.add_argument(
         "--multiple-device",

@@ -1,6 +1,6 @@
 #! /bin/bash
 
-output_dir="./output/finetune/one-by-one/charge-only/test"
+output_dir="./output/one_by_one/finetune_allzero_eval/test"
 
 python scripts/submit/submit.py \
     --output-dir ${output_dir}

@@ -4,7 +4,6 @@ python -m src.predictor.one_by_one \
     --charge-predictor lawformer \
     --imprisonment-predictor zero_shot \
     --charge-model-path ./checkpoints/finetune/charge-3epoch-checkpoint \
-    --charge-base-model-name thunlp/Lawformer \
     --charge-file ./data/charges.json \
     --imprisonment-llm qwen-max \
     --device cuda \

@@ -4,8 +4,11 @@ import torch
 
 
 class CustomDataCollator:
-    def __init__(self, imprisonment_mapper: BaseImprisonmentMapper):
+    def __init__(
+        self, imprisonment_mapper: BaseImprisonmentMapper, is_charge: bool = True
+    ):
         self.imprisonment_mapper = imprisonment_mapper
+        self.is_charge = is_charge
 
     def __call__(self, features: list[dict]) -> dict:
         """
@@ -37,10 +40,7 @@ class CustomDataCollator:
             return {
                 "input_ids": input_ids,
                 "attention_mask": attention_mask,
-                "labels": {
-                    "charge_id": charge_ids,
-                    "imprisonment": imprisonments,
-                },
+                "labels": charge_ids if self.is_charge else imprisonments,
             }
         else:
             # 推理时无标签

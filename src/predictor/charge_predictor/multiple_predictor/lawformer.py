@@ -57,7 +57,7 @@ class LawformerMultipleChargePredictor(BaseMultipleChargePredictor):
             ).to(self.device)
             with torch.no_grad():
                 outputs = self.charge_model(**inputs)
-            charge_logits = outputs.cpu().numpy().reshape(-1)
+            charge_logits = outputs.logits.cpu().numpy().reshape(-1)
             charge_ids = np.argsort(charge_logits)[-self.candidate_cnt :]
             assert np.argsort(charge_logits)[-1] == np.argmax(
                 charge_logits

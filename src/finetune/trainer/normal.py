@@ -112,10 +112,6 @@ class NormalTrainer(BaseTrainer):
         """
         predictions, labels = eval_pred
         predictions = predictions.argmax(axis=-1)
-        if self.is_charge:
-            labels = labels["charge_id"]
-        else:
-            labels = labels["imprisonment"]
         accuracy = self.accuracy_metric.compute(
             predictions=predictions, references=labels
         )
@@ -166,8 +162,8 @@ if __name__ == "__main__":
         default=None,
         help="Cache directory for model and tokenizer.",
     )
-    parser.add_argument("--extra-model-kwargs", type=dict, default={})
-    parser.add_argument("--extra-tokenizer-kwargs", type=dict, default={})
+    parser.add_argument("--extra-model-kwargs", nargs="+", type=str, default=None)
+    parser.add_argument("--extra-tokenizer-kwargs", nargs="+", type=str, default=None)
     parser.add_argument(
         "--enable-wandb", action="store_true", help="Enable Weights and Biases logging."
     )

@@ -66,7 +66,7 @@ class LawformerImprisonmentPredictor(BaseImprisonmentPredictor):
             with torch.no_grad():
                 outputs = self.imprisonment_model(**inputs)
 
-            imprisonment_logits = outputs.cpu().numpy()
+            imprisonment_logits = outputs.logits.cpu().numpy()
             imprisonment = np.argmax(imprisonment_logits, axis=1)[0]
             result[defendant] = [
                 {
