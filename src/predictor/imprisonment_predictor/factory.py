@@ -30,7 +30,6 @@ def get_imprisonment_predictor(
         )
         return LawformerImprisonmentPredictor(
             args.imprisonment_model_path,
-            args.imprisonment_base_model_name,
             imprisonment_num=args.imprisonment_num,
             device=args.device,
             imprisonment_mapper=imprisonment_mapper,

@@ -2,21 +2,19 @@ from typing import override
 
 import numpy as np
 import torch
-from transformers import AutoTokenizer
 
 from .base import BaseImprisonmentPredictor
-from ...finetune.model import LegalSinglePredictionModel
 from ...utils.imprisonment_mapper import (
     BaseImprisonmentMapper,
     IdentityImprisonmentMapper,
 )
+from ...finetune.utils import load_pretrained_models
 
 
 class LawformerImprisonmentPredictor(BaseImprisonmentPredictor):
     def __init__(
         self,
         imprisonment_model_path: str,
-        base_model_name: str,
         imprisonment_num: int = 321,
         device: torch.device = torch.device("cpu"),
         imprisonment_mapper: BaseImprisonmentMapper = None,
@@ -25,18 +23,17 @@ class LawformerImprisonmentPredictor(BaseImprisonmentPredictor):
         Initializes the LawformerChargePredictor with a pre-trained model.
         Args:
             imprisonment_model_path (str): Path to the pre-trained imprisonment prediction model.
-            base_model_name (str): Name of the base model.
             imprisonment_num (int): Number of imprisonment classes.
             device (torch.device): Device to run the model on (default is CPU).
+            imprisonment_mappter: Mapper to map imprisonment and label
         """
         super().__init__()
-        self.imprisonment_model = LegalSinglePredictionModel.from_pretrained(
-            safetensors_path=f"{imprisonment_model_path}/model.safetensors",
-            base_model_name=base_model_name,
-            num_classes=imprisonment_num,
-        )
-        self.imprisonment_tokenizer = AutoTokenizer.from_pretrained(
-            imprisonment_model_path, use_fast=True
+        self.imprisonment_model, self.imprisonment_tokenizer = load_pretrained_models(
+            imprisonment_model_path,
+            is_classification=True,
+            auto_model_kwargs={
+                "num_labels": imprisonment_num,
+            },
         )
         self.device = device
         self.imprisonment_model.eval()

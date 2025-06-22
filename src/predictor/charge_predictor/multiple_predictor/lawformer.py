@@ -2,10 +2,9 @@ from typing import override
 
 import numpy as np
 import torch
-from transformers import AutoTokenizer
 
 from .base import BaseMultipleChargePredictor
-from ....finetune.model import LegalSinglePredictionModel
+from ....finetune.utils import load_pretrained_models
 
 
 class LawformerMultipleChargePredictor(BaseMultipleChargePredictor):
@@ -13,7 +12,6 @@ class LawformerMultipleChargePredictor(BaseMultipleChargePredictor):
         self,
         candidate_cnt: int,
         charge_model_path: str,
-        base_model_name: str,
         charge_num: int = 321,
         device: torch.device = torch.device("cpu"),
         charge_id_mapping: dict = None,
@@ -23,19 +21,17 @@ class LawformerMultipleChargePredictor(BaseMultipleChargePredictor):
         Args:
             candidate_cnt (int): Count of candidates
             charge_model_path (str): Path to the pre-trained charge prediction model.
-            base_model_name (str): Name of the base model.
             charge_num (int): Number of charge classes.
             device (torch.device): Device to run the model on (default is CPU).
             charge_id_mapping (dict, optional): Mapping from charge IDs to human-readable names.
         """
         super().__init__(candidate_cnt)
-        self.charge_model = LegalSinglePredictionModel.from_pretrained(
-            safetensors_path=f"{charge_model_path}/model.safetensors",
-            base_model_name=base_model_name,
-            num_classes=charge_num,
-        )
-        self.charge_tokenizer = AutoTokenizer.from_pretrained(
-            charge_model_path, use_fast=True
+        self.charge_model, self.charge_tokenizer = load_pretrained_models(
+            charge_model_path,
+            is_classification=True,
+            auto_model_kwargs={
+                "num_labels": charge_num,
+            },
         )
         self.device = device
         self.charge_id_mapping = charge_id_mapping if charge_id_mapping else {}

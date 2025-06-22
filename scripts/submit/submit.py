@@ -26,6 +26,9 @@ if __name__ == "__main__":
     )
     for json_file in json_files:
         json_file = os.path.join(output_dir, json_file)
+        if not json_file.endswith("json"):
+            print(f"Skipping {json_file} as it is not a JSON file.")
+            continue
         data = load_json(json_file)
         submission_outcome = data["result"]
         try:

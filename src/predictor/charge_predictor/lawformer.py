@@ -28,7 +28,6 @@ class LawformerChargePredictor(BaseChargePredictor):
         self.multiple_predictor = LawformerMultipleChargePredictor(
             candidate_cnt=1,
             charge_model_path=charge_model_path,
-            base_model_name=base_model_name,
             charge_num=charge_num,
             device=device,
             charge_id_mapping=charge_id_mapping,

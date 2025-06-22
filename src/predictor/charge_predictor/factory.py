@@ -26,7 +26,6 @@ def get_charge_predictor(predictor_type: str, args: Namespace) -> BaseChargePred
         charge_loader = ChargeLoader(args.charge_file)
         return LawformerChargePredictor(
             args.charge_model_path,
-            args.charge_base_model_name,
             charge_num=charge_loader.charge_num,
             charge_id_mapping=charge_loader.reverse_charges,
             device=args.device,
