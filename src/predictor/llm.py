@@ -3,7 +3,7 @@ from typing import override
 
 from ..llm import BaseLLM
 from ..utils import robust_dict_from_str
-from ..utils.type_utils import OutcomeDict
+from ..utils.data_utils import OutcomeDict
 from .base import BasePredictor
 
 

@@ -3,7 +3,7 @@ from typing import override
 from .base import BasePredictor
 from .charge_predictor import BaseChargePredictor
 from .imprisonment_predictor import BaseImprisonmentPredictor
-from ..utils.type_utils import OutcomeDict
+from ..utils.data_utils import OutcomeDict
 
 
 class OneByOnePredictor(BasePredictor):

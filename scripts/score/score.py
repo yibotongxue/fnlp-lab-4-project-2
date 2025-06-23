@@ -6,7 +6,7 @@ import pandas as pd
 from src.metrics.metric_charge import score as charge_score
 from src.metrics.metric_imprisonment import score as imprisonment_score
 from src.utils import load_json
-from src.utils.type_utils import OutcomeDict
+from src.utils.data_utils import OutcomeDict
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Score zero-shot predictions")

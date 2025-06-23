@@ -1,8 +1,7 @@
 import os
 import argparse
 from src.utils import load_jsonl, save_jsonl
-from src.utils.type_utils import CaseDataDict
-from src.utils.data_utils import ChargeLoader
+from src.utils.data_utils import CaseDataDict, ChargeLoader
 
 
 def flatten_cases(

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from ..utils.type_utils import OutcomeDict
+from ..utils.data_utils import OutcomeDict
 
 
 class BasePredictor(ABC):

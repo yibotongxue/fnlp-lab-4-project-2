@@ -3,10 +3,50 @@ from functools import cached_property
 from typing import Any
 
 import numpy as np
+from pydantic import BaseModel
 from torch.utils.data import Dataset
 
 from .json_util import load_json, load_jsonl
-from .type_utils import CaseDataDict
+from .type_utils import enable_bracket_access
+
+__all__ = [
+    "JudgmentDict",
+    "OutcomeDict",
+    "CaseDataDict",
+    "ArticleLoader",
+    "ChargeLoader",
+    "LegalCaseDataset",
+]
+
+
+@enable_bracket_access
+class JudgmentDict(BaseModel):
+    standard_accusation: str
+    imprisonment: int | str | float
+
+
+@enable_bracket_access
+class OutcomeDict(BaseModel):
+    name: str
+    judgment: list[JudgmentDict]
+
+    @property
+    def standard_accusation(self) -> list[str]:
+        return [j.standard_accusation for j in self.judgment]
+
+    def get_accusation_str(self) -> str:
+        return ",".join(self.standard_accusation)
+
+    @property
+    def imprisonment(self) -> list[int]:
+        return [j.imprisonment for j in self.judgment]
+
+
+@enable_bracket_access
+class CaseDataDict(BaseModel):
+    fact: str
+    defendants: list[str]
+    outcomes: list[OutcomeDict]
 
 
 class ArticleLoader:

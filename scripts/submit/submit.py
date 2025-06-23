@@ -4,7 +4,7 @@ import os
 import pandas as pd
 
 from src.utils import load_json
-from src.utils.type_utils import OutcomeDict
+from src.utils.data_utils import OutcomeDict
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Score zero-shot predictions")

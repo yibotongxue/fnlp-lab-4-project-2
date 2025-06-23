@@ -5,7 +5,7 @@ import torch
 from transformers import AutoTokenizer
 
 from .base import BasePredictor
-from ..utils.type_utils import OutcomeDict
+from ..utils.data_utils import OutcomeDict
 from ..utils.imprisonment_mapper import (
     BaseImprisonmentMapper,
     IdentityImprisonmentMapper,

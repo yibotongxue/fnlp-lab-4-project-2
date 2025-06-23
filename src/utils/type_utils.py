@@ -1,56 +1,14 @@
-from typing import List
+def enable_bracket_access(cls):
+    def __getitem__(self, key):
+        try:
+            return getattr(self, key)
+        except AttributeError:
+            raise KeyError(f"'{type(self).__name__}' 没有属性 '{key}'")
 
-from pydantic import BaseModel
+    def __setitem__(self, key, value):
+        setattr(self, key, value)
 
+    cls.__getitem__ = __getitem__
+    cls.__setitem__ = __setitem__
 
-class JudgmentDict(BaseModel):
-    standard_accusation: str
-    imprisonment: int | str | float
-
-    def __getitem__(self, item):
-        if item == "standard_accusation":
-            return self.standard_accusation
-        elif item == "imprisonment":
-            return self.imprisonment
-        else:
-            raise KeyError(f"Invalid key: {item}")
-
-
-class OutcomeDict(BaseModel):
-    name: str
-    judgment: List[JudgmentDict]
-
-    def __getitem__(self, item):
-        if item == "name":
-            return self.name
-        elif item == "judgment":
-            return self.judgment
-        else:
-            raise KeyError(f"Invalid key: {item}")
-
-    @property
-    def standard_accusation(self) -> list[str]:
-        return [j.standard_accusation for j in self.judgment]
-
-    def get_accusation_str(self) -> str:
-        return ",".join(self.standard_accusation)
-
-    @property
-    def imprisonment(self) -> list[int]:
-        return [j.imprisonment for j in self.judgment]
-
-
-class CaseDataDict(BaseModel):
-    fact: str
-    defendants: List[str]
-    outcomes: List[OutcomeDict]
-
-    def __getitem__(self, item):
-        if item == "fact":
-            return self.fact
-        elif item == "defendants":
-            return self.defendants
-        elif item == "outcomes":
-            return self.outcomes
-        else:
-            raise KeyError(f"Invalid key: {item}")
+    return cls
