@@ -10,7 +10,7 @@ class BaseTrainer(ABC):
         cfgs: dict[str, Any],
     ):
         self.cfgs = cfgs
-        print(f"Training configuration: {self.train_config}")
+        print(f"Training configuration: {self.cfgs}")
         self.init_model()
         print(f"Model initialized: {self.model.__class__.__name__}")
         self.init_datasets()

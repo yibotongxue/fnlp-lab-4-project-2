@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Callable
+from typing import Callable, TypedDict
 
 import torch
 import transformers
@@ -13,6 +13,7 @@ from .data_formatter import (
     ChargeFormatteredSample,
 )
 from ...utils.tools import enable_bracket_access
+from .template_registry import TEMPLATE_REGISTRY
 
 
 __all__ = [
@@ -30,8 +31,7 @@ class CaseSample(BaseModel):
     label: int
 
 
-@enable_bracket_access
-class CaseBatch(BaseModel):
+class CaseBatch(TypedDict):
     input_ids: torch.LongTensor
     labels: torch.LongTensor
     attention_mask: torch.BoolTensor
@@ -52,7 +52,7 @@ class CaseDataset(Dataset, ABC):
         super().__init__()
         assert path, f"You must set the valid datasets path! Here is {path}"
         assert template, f"You must set the valid template path! Here is {template}"
-        self.template = template
+        self.template = TEMPLATE_REGISTRY[template]()
 
         if isinstance(optional_args, str):
             optional_args = [optional_args]
@@ -106,7 +106,6 @@ class ChargeDataset(CaseDataset):
         self,
         path: str,
         template: BaseFormatter,
-        tokenizer: transformers.PreTrainedTokenizer,
         charge_mapper: dict[str, int],
         name: str | None = None,
         size: int | None = None,
@@ -117,7 +116,6 @@ class ChargeDataset(CaseDataset):
         super().__init__(
             path,
             template,
-            tokenizer,
             name=name,
             size=size,
             split=split,
@@ -155,7 +153,6 @@ class ImprisonmentDataset(CaseDataset):
         self,
         path: str,
         template: BaseFormatter,
-        tokenizer: transformers.PreTrainedTokenizer,
         imprisonment_mapper: Callable[[int], int],
         name: str | None = None,
         size: int | None = None,
@@ -166,7 +163,6 @@ class ImprisonmentDataset(CaseDataset):
         super().__init__(
             path,
             template,
-            tokenizer,
             name=name,
             size=size,
             split=split,
@@ -191,10 +187,10 @@ class ImprisonmentDataset(CaseDataset):
         return index_mapper
 
     def preprocess(
-        self, raw_sample: ChargeFormatteredSample, defendant_idx: int
+        self, raw_sample: ChargeFormatteredSample, internal_idx: int
     ) -> CaseSample:
         formatted_sample = self.template.format_imprisonment_sample(raw_sample)[
-            defendant_idx
+            internal_idx
         ]
         result_dict = {}
         result_dict["fact"] = formatted_sample["fact"]
@@ -205,9 +201,12 @@ class ImprisonmentDataset(CaseDataset):
 
 
 class CaseCollator:
-    def __init__(self, tokenizer: transformers.PreTrainedTokenizer) -> None:
+    def __init__(
+        self, tokenizer: transformers.PreTrainedTokenizer, max_length: int = 512
+    ) -> None:
         """Initialize a collator."""
         self.tokenizer = tokenizer
+        self.max_length = max_length
 
     def __call__(self, samples: list[CaseSample]) -> CaseBatch:
         return_dict = {}
@@ -215,8 +214,9 @@ class CaseCollator:
         tokenized_input = self.tokenizer(
             text=concated_text,
             return_tensors="pt",
-            padding=True,
-            padding_side=self.padding_side,
+            padding="max_length",
+            max_length=self.max_length,
+            truncation=True,
             return_attention_mask=True,
             add_special_tokens=False,
         )

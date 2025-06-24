@@ -52,9 +52,9 @@ class CourseFormatter(BaseFormatter):
                 is_in_outcome = False
                 charge_cnt += 1
                 for outcome in outcomes:
-                    imprisonment_cnt += 1
                     if defendant == outcome.name:
                         is_in_outcome = True
+                        imprisonment_cnt += len(outcome.standard_accusation)
                         break
                 if not is_in_outcome:
                     return False, 0, 0
@@ -77,7 +77,7 @@ class CourseFormatter(BaseFormatter):
             result_dict["fact"] = (
                 f"【当前被告人：{outcome.name}，" + case_data_dict.fact
             )
-            result_dict["charge_name"] = outcome.standard_accusation
+            result_dict["charge_name"] = outcome.standard_accusation[0]
             result_list.append(ChargeFormatteredSample(**result_dict))
         return result_list
 

@@ -1,22 +1,49 @@
-train_config:
-  output_dir: ./output/finetune/charge
-  logging_dir: ./output/finetune/charge/logs
-  learning_rate: 5e-5
-  train_batch_size: 8
-  eval_batch_size: 8
-  epochs: 3
-  weight_decay: 0.01
-  eval_strategy: "steps"
-  eval_steps: 500
-  save_strategy: "epoch"
-  enable_wandb: false
-  run_name: "charge_run"
-  wandb_project: "charge-prediction"
-  extra_model_kwargs: {}
-  extra_tokenizer_kwargs: {}
+data_cfgs:
+  type: charge
+  max_length: 512
+  train_dataset_name_or_path: ./data/course/train.jsonl
+  train_dataset_template: Course
+  train_size: null
+  train_data_files: null
+  train_dataset_optional_args: {}
+  eval_dataset_name_or_path: ./data/course/eval.jsonl
+  eval_dataset_template: Course
+  eval_size: null
+  eval_data_files: null
+  eval_dataset_optional_args: {}
+  charge_file_path: ./data/charges.json
+
+model_cfgs:
+  model_name_or_path: google-bert/bert-base-chinese
   model_max_length: 512
-  charge_num: 321
-  imprisonment_mapper_config:
-    imprisonment_mapper_type: "interval"
-    lower_bound: [0, 6, 7, 8, 9, 10, 12, 18, 25, 35, 61, 135]
-    represent_list: [0, 6, 7, 8, 9, 10, 12, 18, 30, 36, 72, 180]
+  cache_dir: null
+  auto_model_kwargs:
+    num_labels: 321
+  auto_tokenizer_kwargs: {}
+
+train_cfgs:
+  output_dir: ./output/finetune/charge
+  logging_strategy: steps
+  logging_steps: 10
+  eval_strategy: steps
+  eval_steps: 500
+  save_strategy: steps
+  save_steps: 500
+  load_best_model_at_end: true
+  learning_rate: 5.e-5
+  weight_decay: 5.e-6
+  per_device_train_batch_size: 8
+  per_device_eval_batch_size: 8
+  num_train_epochs: 3
+  report_to: wandb
+  project_name: fnlp_project2
+  run_name: charge_run
+  bf16: true
+  fp16: false
+  dataloader_num_workers: 4
+  gradient_accumulation_steps: 2
+  torch_compile: true
+  seed: 42
+  max_grad_norm: 8.0
+  metric_for_best_model: f1
+  greater_is_better: true
