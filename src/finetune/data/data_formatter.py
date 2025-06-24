@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from .template_registry import register_template
 from ...utils.data_utils import CaseDataDict
-from ...utils.type_utils import enable_bracket_access
+from ...utils.tools import enable_bracket_access
 
 
 @enable_bracket_access

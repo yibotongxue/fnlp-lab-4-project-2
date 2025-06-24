@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-import argparse
 from typing import Any
 
 import evaluate
@@ -7,10 +6,10 @@ import evaluate
 
 class BaseTrainer(ABC):
     def __init__(
-        self, args: argparse.Namespace, train_config: dict[str, Any] | None = None
+        self,
+        cfgs: dict[str, Any],
     ):
-        self.args = args
-        self.train_config = train_config or {}
+        self.cfgs = cfgs
         print(f"Training configuration: {self.train_config}")
         self.init_model()
         print(f"Model initialized: {self.model.__class__.__name__}")
@@ -24,7 +23,6 @@ class BaseTrainer(ABC):
     @abstractmethod
     def init_model(self):
         """Initialize the model."""
-        raise NotImplementedError("Subclasses should implement this method.")
 
     @abstractmethod
     def init_datasets(self):

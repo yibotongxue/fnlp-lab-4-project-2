@@ -12,3 +12,13 @@ def enable_bracket_access(cls):
     cls.__setitem__ = __setitem__
 
     return cls
+
+
+def extract_answer(response: str) -> str:
+    import re
+
+    pattern = re.compile(r"<answer>([^<]*)</answer>")
+    matcher = pattern.findall(response)
+    if len(matcher) < 1:
+        raise ValueError(f'No answer found in "{response}"')
+    return matcher[-1]

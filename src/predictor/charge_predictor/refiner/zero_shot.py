@@ -1,8 +1,8 @@
-import re
 from typing import override
 
 from .base import BaseRefiner
 from ....llm import get_llm
+from ....utils.tools import extract_answer
 
 
 class ZeroShotRefiner(BaseRefiner):
@@ -14,7 +14,7 @@ class ZeroShotRefiner(BaseRefiner):
     def refine(self, fact: str, defendant: str, candidate: list[str]) -> str:
         prompt = self.build_prompt(fact, defendant, candidate)
         response = self.llm.generate(prompt)
-        return [self.extract_answer(response)]
+        return [extract_answer(response)]
 
     def build_prompt(self, fact: str, defendant: str, candidate: list[str]) -> str:
         prompt = f"""你是一个北京大学法律专业的学生，十分熟悉中华人民共和国法律特别是刑法，现在你需要根据中华人民共和国刑法的有关规定，对于用户给出的指控事实和被告，给出被告的罪名。
@@ -29,11 +29,3 @@ class ZeroShotRefiner(BaseRefiner):
 请按照上面的流程分析并给出最终答案。
 """
         return prompt
-
-    @staticmethod
-    def extract_answer(response: str) -> str:
-        pattern = re.compile(r"<answer>([^<]*)</answer>")
-        matcher = pattern.findall(response)
-        if len(matcher) < 1:
-            raise ValueError(f'No answer found in "{response}"')
-        return matcher[-1]

@@ -1,5 +1,4 @@
 import argparse
-import random
 from typing import override, Any
 import os
 
@@ -7,47 +6,60 @@ from transformers import TrainingArguments, Trainer
 
 from .base import BaseTrainer
 from ..utils import load_pretrained_models
-from ..data import CaseDataset, CustomDataCollator
-from ...utils import load_jsonl
+from ..data import ChargeDataset, ImprisonmentDataset, CaseCollator
+from ...utils import load_json
 from ...utils.imprisonment_mapper import get_imprisonment_mapper
 
 
 class NormalTrainer(BaseTrainer):
-    def __init__(
-        self,
-        args: argparse.Namespace,
-        train_config: dict[str, Any] | None = None,
-        is_charge: bool = True,
-    ):
-        self.is_charge = is_charge
-        super().__init__(args, train_config)
+    def __init__(self, cfgs: dict[str, Any]):
+        super().__init__(cfgs)
 
     @override
     def init_datasets(self):
         """Initialize the datasets."""
-        train_data_path = self.args.train_data_path
-        # test_data_path = self.args.test_data_path
-        train_raw_cases = load_jsonl(train_data_path)
-        random.shuffle(train_raw_cases)
-        # test_raw_cases = load_jsonl(test_data_path)
-        self.train_dataset = CaseDataset(
-            train_raw_cases[:-1000],
-            self.tokenizer,
-            is_train=True,
-            with_accusation=(not self.is_charge),
-        )
-        self.test_dataset = CaseDataset(
-            train_raw_cases[-1000:],
-            self.tokenizer,
-            is_train=True,
-            with_accusation=(not self.is_charge),
-        )
-        self.imprisonment_mapper = get_imprisonment_mapper(
-            self.train_config["imprisonment_mapper_config"]
-        )
-        self.data_collator = CustomDataCollator(
-            imprisonment_mapper=self.imprisonment_mapper,
-            is_charge=self.is_charge,
+        data_cfgs: dict[str, Any] = self.cfgs["data_cfgs"]
+        common_train_args = {
+            "path": data_cfgs.train_dataset_name_or_path,
+            "template": data_cfgs.train_dataset_template,
+            "tokenizer": self.tokenizer,
+            "name": data_cfgs.get("train_dataset_name", None),
+            "size": int(data_cfgs.get("train_size", None)),
+            "split": "train",
+            "data_files": data_cfgs.get("train_data_files", None),
+            "optional_args": data_cfgs.get("train_dataset_optional_args", {}),
+        }
+        common_eval_args = {
+            "path": data_cfgs.eval_dataset_name_or_path,
+            "template": data_cfgs.eval_dataset_template,
+            "tokenizer": self.tokenizer,
+            "name": data_cfgs.get("eval_dataset_name", None),
+            "size": int(data_cfgs.get("eval_size", None)),
+            "split": "eval",
+            "data_files": data_cfgs.get("eval_data_files", None),
+            "optional_args": data_cfgs.get("eval_dataset_optional_args", {}),
+        }
+        if data_cfgs["type"] == "charge":
+            self.charge_mapper = load_json(data_cfgs["charge_file_path"])
+            self.train_dataset = ChargeDataset(
+                charge_mapper=self.charge_mapper, **common_train_args
+            )
+            self.eval_dataset = ChargeDataset(
+                charge_mapper=self.charge_mapper, **common_eval_args
+            )
+        elif data_cfgs["type"] == "imprisonment":
+            self.imprisonment_mapper = get_imprisonment_mapper(
+                imprisonment_mapper_config=data_cfgs["imprisonment_mapper_config"]
+            )
+            self.train_dataset = ImprisonmentDataset(
+                imprisonment_mapper=self.imprisonment_mapper, **common_train_args
+            )
+            self.eval_dataset = ImprisonmentDataset(
+                imprisonment_mapper=imprisonment_trainer, **common_eval_args
+            )
+
+        self.data_collator = CaseCollator(
+            tokenizer=self.tokenizer,
         )
 
     @override
@@ -65,8 +77,9 @@ class NormalTrainer(BaseTrainer):
     @override
     def init_trainer(self):
         """Initialize the training arguments."""
+        train_cfgs: dict[str, Any] = self.cfgs["train_cfgs"]
         training_args = {
-            "output_dir": self.train_config["output_dir"],
+            "output_dir": train_cfgs.get("output_dir", "trainer_output"),
             "learning_rate": float(self.train_config["learning_rate"]),
             "per_device_train_batch_size": int(self.train_config["train_batch_size"]),
             "per_device_eval_batch_size": int(self.train_config["eval_batch_size"]),

@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from torch.utils.data import Dataset
 
 from .json_util import load_json, load_jsonl
-from .type_utils import enable_bracket_access
+from .tools import enable_bracket_access
 
 __all__ = [
     "JudgmentDict",
