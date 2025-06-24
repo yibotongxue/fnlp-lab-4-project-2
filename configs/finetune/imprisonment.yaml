@@ -1,5 +1,6 @@
 data_cfgs:
   type: imprisonment
+  data_type: long
   max_length: 512
   train_dataset_name_or_path: ./data/course/train.jsonl
   train_dataset_template: Course

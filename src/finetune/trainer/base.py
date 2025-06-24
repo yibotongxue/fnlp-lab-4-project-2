@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-import evaluate
-
 
 class BaseTrainer(ABC):
     def __init__(
@@ -15,8 +13,6 @@ class BaseTrainer(ABC):
         print(f"Model initialized: {self.model.__class__.__name__}")
         self.init_datasets()
         print("Datasets initialized.")
-        self.init_metrics()
-        print("Metrics initialized.")
         self.init_trainer()
         print("Trainer initialized.")
 
@@ -31,11 +27,6 @@ class BaseTrainer(ABC):
     @abstractmethod
     def init_trainer(self):
         """Initialize the training arguments."""
-
-    def init_metrics(self):
-        """Initialize the metrics."""
-        self.accuracy_metric = evaluate.load("accuracy")
-        self.f1_metric = evaluate.load("f1")
 
     @abstractmethod
     def compute_metrics(self, eval_pred):

@@ -1,6 +1,6 @@
 data_cfgs:
-  type: charge
-  data_type: long
+  type: multi_charge
+  data_type: bf16
   max_length: 512
   train_dataset_name_or_path: ./data/course/train.jsonl
   train_dataset_template: Course
@@ -20,10 +20,11 @@ model_cfgs:
   cache_dir: null
   auto_model_kwargs:
     num_labels: 321
+    problem_type: multi_label_classification
   auto_tokenizer_kwargs: {}
 
 train_cfgs:
-  output_dir: ./output/finetune/charge
+  output_dir: ./output/finetune/multi-charge
   logging_strategy: steps
   logging_steps: 10
   eval_strategy: steps

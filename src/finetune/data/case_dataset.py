@@ -11,6 +11,8 @@ from pydantic import BaseModel
 from .data_formatter import (
     BaseFormatter,
     ChargeFormatteredSample,
+    MultiChargeFormatteredSample,
+    ImprisonmentFormatteredSample,
 )
 from ...utils.tools import enable_bracket_access
 from .template_registry import TEMPLATE_REGISTRY
@@ -19,7 +21,8 @@ from .template_registry import TEMPLATE_REGISTRY
 __all__ = [
     "CaseSample",
     "CaseBatch",
-    "ChargeDataset",
+    "SingleChargeDataset",
+    "MultiChargeDataset",
     "ImprisonmentDataset",
     "CaseCollator",
 ]
@@ -28,7 +31,7 @@ __all__ = [
 @enable_bracket_access
 class CaseSample(BaseModel):
     fact: str
-    label: int
+    label: int | list[int]
 
 
 class CaseBatch(TypedDict):
@@ -137,6 +140,11 @@ class ChargeDataset(CaseDataset):
             index_mapper.extend([(i, charge_idx) for charge_idx in range(charge_cnt)])
         return index_mapper
 
+
+class SingleChargeDataset(ChargeDataset):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
     def preprocess(
         self, raw_sample: ChargeFormatteredSample, defendant_idx: int
     ) -> CaseSample:
@@ -144,6 +152,24 @@ class ChargeDataset(CaseDataset):
         result_dict = {}
         result_dict["fact"] = formatted_sample["fact"]
         result_dict["label"] = self.charge_mapper[formatted_sample["charge_name"]]
+        return CaseSample(**result_dict)
+
+
+class MultiChargeDataset(ChargeDataset):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def preprocess(
+        self, raw_sample: MultiChargeFormatteredSample, defendant_idx: int
+    ) -> CaseSample:
+        formatted_sample = self.template.format_multi_charge_sample(raw_sample)[
+            defendant_idx
+        ]
+        result_dict = {}
+        result_dict["fact"] = formatted_sample["fact"]
+        result_dict["label"] = [0] * len(self.charge_mapper.keys())
+        for charge_name in formatted_sample["charge_list"]:
+            result_dict["label"][self.charge_mapper[charge_name]] = 1
         return CaseSample(**result_dict)
 
 
@@ -187,7 +213,7 @@ class ImprisonmentDataset(CaseDataset):
         return index_mapper
 
     def preprocess(
-        self, raw_sample: ChargeFormatteredSample, internal_idx: int
+        self, raw_sample: ImprisonmentFormatteredSample, internal_idx: int
     ) -> CaseSample:
         formatted_sample = self.template.format_imprisonment_sample(raw_sample)[
             internal_idx
@@ -202,11 +228,15 @@ class ImprisonmentDataset(CaseDataset):
 
 class CaseCollator:
     def __init__(
-        self, tokenizer: transformers.PreTrainedTokenizer, max_length: int = 512
+        self,
+        tokenizer: transformers.PreTrainedTokenizer,
+        max_length: int = 512,
+        data_type: torch.dtype = torch.float,
     ) -> None:
         """Initialize a collator."""
         self.tokenizer = tokenizer
         self.max_length = max_length
+        self.data_type = data_type
 
     def __call__(self, samples: list[CaseSample]) -> CaseBatch:
         return_dict = {}
@@ -224,7 +254,7 @@ class CaseCollator:
         return_dict["attention_mask"] = tokenized_input["attention_mask"]
         return_dict["labels"] = torch.tensor(
             [sample["label"] for sample in samples],
-            dtype=torch.long,
+            dtype=self.data_type,
         )
 
         return CaseBatch(**return_dict)

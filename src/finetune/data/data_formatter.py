@@ -15,6 +15,12 @@ class ChargeFormatteredSample(BaseModel):
 
 
 @enable_bracket_access
+class MultiChargeFormatteredSample(BaseModel):
+    fact: str
+    charge_list: list[str]
+
+
+@enable_bracket_access
 class ImprisonmentFormatteredSample(BaseModel):
     fact: str
     imprisonment: int
@@ -25,10 +31,18 @@ class BaseFormatter(ABC):
     def check_validation(self, raw_sample: dict[str, Any]) -> bool:
         pass
 
-    @abstractmethod
     def format_charge_sample(
         self, raw_sample: dict[str, Any]
     ) -> list[ChargeFormatteredSample]:
+        return [
+            ChargeFormatteredSample(fact=sample.fact, charge_name=sample.charge_list[0])
+            for sample in self.format_multi_charge_sample(raw_sample)
+        ]
+
+    @abstractmethod
+    def format_multi_charge_sample(
+        self, raw_sample: dict[str, Any]
+    ) -> list[MultiChargeFormatteredSample]:
         pass
 
     @abstractmethod
@@ -54,11 +68,11 @@ class CourseFormatter(BaseFormatter):
                 for outcome in outcomes:
                     if defendant == outcome.name:
                         is_in_outcome = True
-                        imprisonment_cnt += len(outcome.standard_accusation)
                         break
                 if not is_in_outcome:
                     return False, 0, 0
             for outcome in outcomes:
+                imprisonment_cnt += len(outcome.judgment)
                 if not outcome.name in defendants:
                     return False, 0, 0
         except:
@@ -66,9 +80,9 @@ class CourseFormatter(BaseFormatter):
         return True, charge_cnt, imprisonment_cnt
 
     @override
-    def format_charge_sample(
+    def format_multi_charge_sample(
         self, raw_sample: dict[str, Any]
-    ) -> list[ChargeFormatteredSample]:
+    ) -> list[MultiChargeFormatteredSample]:
         case_data_dict = CaseDataDict(**raw_sample)
         outcome_list = case_data_dict.outcomes
         result_list = []
@@ -77,8 +91,8 @@ class CourseFormatter(BaseFormatter):
             result_dict["fact"] = (
                 f"【当前被告人：{outcome.name}，" + case_data_dict.fact
             )
-            result_dict["charge_name"] = outcome.standard_accusation[0]
-            result_list.append(ChargeFormatteredSample(**result_dict))
+            result_dict["charge_list"] = outcome.standard_accusation
+            result_list.append(MultiChargeFormatteredSample(**result_dict))
         return result_list
 
     @override

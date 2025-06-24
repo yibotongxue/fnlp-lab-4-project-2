@@ -3,7 +3,8 @@ from .case_dataset import *
 __all__ = [
     "CaseSample",
     "CaseBatch",
-    "ChargeDataset",
+    "SingleChargeDataset",
+    "MultiChargeDataset",
     "ImprisonmentDataset",
     "CaseCollator",
 ]

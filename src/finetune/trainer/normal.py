@@ -1,11 +1,24 @@
 from typing import override, Any
 import os
 
+import numpy as np
+import torch
 from transformers import TrainingArguments, Trainer
+from sklearn.metrics import (
+    accuracy_score,
+    f1_score,
+    precision_score,
+    recall_score,
+)
 
 from .base import BaseTrainer
 from ..utils import load_pretrained_models
-from ..data import ChargeDataset, ImprisonmentDataset, CaseCollator
+from ..data import (
+    SingleChargeDataset,
+    MultiChargeDataset,
+    ImprisonmentDataset,
+    CaseCollator,
+)
 from ...utils import load_json
 from ...utils.imprisonment_mapper import get_imprisonment_mapper
 
@@ -38,10 +51,18 @@ class NormalTrainer(BaseTrainer):
         }
         if data_cfgs["type"] == "charge":
             self.charge_mapper = load_json(data_cfgs["charge_file_path"])
-            self.train_dataset = ChargeDataset(
+            self.train_dataset = SingleChargeDataset(
                 charge_mapper=self.charge_mapper, **common_train_args
             )
-            self.eval_dataset = ChargeDataset(
+            self.eval_dataset = SingleChargeDataset(
+                charge_mapper=self.charge_mapper, **common_eval_args
+            )
+        elif data_cfgs["type"] == "multi_charge":
+            self.charge_mapper = load_json(data_cfgs["charge_file_path"])
+            self.train_dataset = MultiChargeDataset(
+                charge_mapper=self.charge_mapper, **common_train_args
+            )
+            self.eval_dataset = MultiChargeDataset(
                 charge_mapper=self.charge_mapper, **common_eval_args
             )
         elif data_cfgs["type"] == "imprisonment":
@@ -57,9 +78,23 @@ class NormalTrainer(BaseTrainer):
                 **common_eval_args,
             )
 
+        if data_cfgs["data_type"] == "bf16":
+            data_type = torch.bfloat16
+        elif data_cfgs["data_type"] == "f16":
+            data_type = torch.float16
+        elif data_cfgs["data_type"] == "long":
+            data_type = torch.long
+        elif data_cfgs["data_type"] == "float" or data_cfgs["data_type"] is None:
+            data_type = torch.float
+        else:
+            print(
+                f"Warning: unsupported data type {data_cfgs["data_type"]}, set to float as default"
+            )
+            data_type = torch.float
         self.data_collator = CaseCollator(
             tokenizer=self.tokenizer,
             max_length=data_cfgs["max_length"],
+            data_type=data_type,
         )
 
     @override
@@ -108,14 +143,43 @@ class NormalTrainer(BaseTrainer):
             dict: Computed metrics.
         """
         predictions, labels = eval_pred
-        predictions = predictions.argmax(axis=-1)
-        accuracy = self.accuracy_metric.compute(
-            predictions=predictions, references=labels
-        )
-        f1 = self.f1_metric.compute(
-            predictions=predictions, references=labels, average="micro"
-        )
-        return {"accuracy": accuracy["accuracy"], "f1": f1["f1"]}
+        metrics = {}  # Initialize an empty dictionary to store all metrics
+
+        if self.cfgs["data_cfgs"]["type"] == "multi_charge":
+            predictions = 1 / (1 + np.exp(-predictions))
+            predictions = (predictions > 0.5).astype(int)
+            labels = labels.astype(int)
+            metrics["accuracy"] = accuracy_score(
+                y_pred=predictions,
+                y_true=labels,
+            )
+            metrics["f1"] = f1_score(
+                y_pred=predictions, y_true=labels, average="samples"
+            )
+            metrics["precision"] = precision_score(
+                y_pred=predictions, y_true=labels, average="samples"
+            )
+            metrics["recall"] = recall_score(
+                y_pred=predictions, y_true=labels, average="samples"
+            )
+        else:
+            predictions = predictions.argmax(axis=-1).astype(int)
+            labels = labels.astype(int).reshape(-1)
+            metrics["accuracy"] = accuracy_score(
+                y_pred=predictions,
+                y_true=labels,
+            )
+            metrics["f1"] = f1_score(
+                y_pred=predictions, y_true=labels, average="weighted"
+            )
+            metrics["precision"] = precision_score(
+                y_pred=predictions, y_true=labels, average="weighted"
+            )
+            metrics["recall"] = recall_score(
+                y_pred=predictions, y_true=labels, average="weighted"
+            )
+
+        return metrics
 
 
 def main():
