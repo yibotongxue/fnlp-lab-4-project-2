@@ -3,6 +3,7 @@ import os
 
 import numpy as np
 import torch
+from torch import nn
 from transformers import TrainingArguments, Trainer
 from sklearn.metrics import (
     accuracy_score,
@@ -49,6 +50,7 @@ class NormalTrainer(BaseTrainer):
             "data_files": data_cfgs.get("eval_data_files", None),
             "optional_args": data_cfgs.get("eval_dataset_optional_args", {}),
         }
+        self.is_multi_label = data_cfgs["type"] == "multi_charge"
         if data_cfgs["type"] == "charge":
             self.charge_mapper = load_json(data_cfgs["charge_file_path"])
             self.train_dataset = SingleChargeDataset(
@@ -130,6 +132,9 @@ class NormalTrainer(BaseTrainer):
             tokenizer=self.tokenizer,
             data_collator=self.data_collator,
             compute_metrics=self.compute_metrics,
+            compute_loss_func=(
+                self.compute_multi_label_loss if self.is_multi_label else None
+            ),
         )
 
     def compute_metrics(self, eval_pred):
@@ -145,7 +150,7 @@ class NormalTrainer(BaseTrainer):
         predictions, labels = eval_pred
         metrics = {}  # Initialize an empty dictionary to store all metrics
 
-        if self.cfgs["data_cfgs"]["type"] == "multi_charge":
+        if self.is_multi_label:
             predictions = 1 / (1 + np.exp(-predictions))
             predictions = (predictions > 0.5).astype(int)
             labels = labels.astype(int)
@@ -180,6 +185,9 @@ class NormalTrainer(BaseTrainer):
             )
 
         return metrics
+
+    def compute_multi_label_loss(self, outputs, labels, num_items_in_batch=None):
+        return nn.BCEWithLogitsLoss()(outputs.logits, labels)
 
 
 def main():
