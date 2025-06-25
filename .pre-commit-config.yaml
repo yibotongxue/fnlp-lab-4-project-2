@@ -22,7 +22,7 @@ repos:
       - id: check-added-large-files
         exclude: |
           (?x)(
-            ^data/
+            ^(data|images)/
           )
       - id: check-merge-conflict
       - id: check-executables-have-shebangs
