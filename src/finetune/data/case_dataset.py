@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Callable, TypedDict
+from typing import Any, Callable, TypedDict
 
 import torch
 import transformers
@@ -13,6 +13,7 @@ from .data_formatter import (
     ChargeFormatteredSample,
     MultiChargeFormatteredSample,
     ImprisonmentFormatteredSample,
+    BothFormatteredSample,
 )
 from ...utils.tools import enable_bracket_access
 from .template_registry import TEMPLATE_REGISTRY
@@ -24,6 +25,7 @@ __all__ = [
     "SingleChargeDataset",
     "MultiChargeDataset",
     "ImprisonmentDataset",
+    "BothDataset",
     "CaseCollator",
 ]
 
@@ -31,12 +33,12 @@ __all__ = [
 @enable_bracket_access
 class CaseSample(BaseModel):
     fact: str
-    label: int | list[int]
+    label: int | list[int] | dict[str, Any]
 
 
 class CaseBatch(TypedDict):
     input_ids: torch.LongTensor
-    labels: torch.LongTensor
+    labels: torch.LongTensor | dict[str, torch.LongTensor]
     attention_mask: torch.BoolTensor
 
 
@@ -226,6 +228,57 @@ class ImprisonmentDataset(CaseDataset):
         return CaseSample(**result_dict)
 
 
+class BothDataset(CaseDataset):
+    def __init__(
+        self,
+        path: str,
+        template: BaseFormatter,
+        charge_mapper: dict[str, int],
+        imprisonment_mapper: Callable[[int], int],
+        name: str | None = None,
+        size: int | None = None,
+        split: str | None = None,
+        data_files: str | None = None,
+        optional_args: list | str = [],
+    ):
+        super().__init__(
+            path,
+            template,
+            name=name,
+            size=size,
+            split=split,
+            data_files=data_files,
+            optional_args=optional_args,
+        )
+        self.charge_mapper = charge_mapper
+        self.imprisonment_mapper = imprisonment_mapper
+
+    def filter_indices(self) -> list[tuple[int, int]]:
+        index_mapper = []
+        for i, item in tqdm(
+            enumerate(self.raw_data),
+            total=len(self.raw_data),
+            desc="Filtering valid indices",
+        ):
+            is_valid, charge_cnt, _ = self.template.check_validation(item)
+            if not is_valid:
+                continue
+            index_mapper.extend([(i, charge_idx) for charge_idx in range(charge_cnt)])
+        return index_mapper
+
+    def preprocess(
+        self, raw_sample: BothFormatteredSample, internal_idx: int
+    ) -> CaseSample:
+        formatted_sample = self.template.format_both_sample(raw_sample)[internal_idx]
+        result_dict = {}
+        result_dict["fact"] = formatted_sample["fact"]
+        result_dict["label"] = {
+            "charge_id": self.charge_mapper[formatted_sample["charge_name"]],
+            "imprisonment": self.imprisonment_mapper(formatted_sample["imprisonment"]),
+        }
+        return CaseSample(**result_dict)
+
+
 class CaseCollator:
     def __init__(
         self,
@@ -252,9 +305,17 @@ class CaseCollator:
         )
         return_dict["input_ids"] = tokenized_input["input_ids"]
         return_dict["attention_mask"] = tokenized_input["attention_mask"]
-        return_dict["labels"] = torch.tensor(
-            [sample["label"] for sample in samples],
-            dtype=self.data_type,
-        )
+        if isinstance(samples[0]["label"], dict):
+            return_dict["labels"] = {}
+            for k in samples[0]["label"].keys():
+                return_dict["labels"][k] = torch.tensor(
+                    [sample["label"][k] for sample in samples],
+                    dtype=self.data_type,
+                )
+        else:
+            return_dict["labels"] = torch.tensor(
+                [sample["label"] for sample in samples],
+                dtype=self.data_type,
+            )
 
         return CaseBatch(**return_dict)

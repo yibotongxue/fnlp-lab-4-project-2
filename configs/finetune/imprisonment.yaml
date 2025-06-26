@@ -41,7 +41,7 @@ train_cfgs:
   num_train_epochs: 3
   report_to: wandb
   project_name: fnlp_project2
-  run_name: charge_run
+  run_name: imprisonment_run
   bf16: true
   fp16: false
   dataloader_num_workers: 4

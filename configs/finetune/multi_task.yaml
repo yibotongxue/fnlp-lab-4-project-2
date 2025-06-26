@@ -1,6 +1,5 @@
 data_cfgs:
-  type: multi_charge
-  data_type: bf16
+  data_type: long
   max_length: 512
   train_dataset_name_or_path: ./data/course/train.jsonl
   train_dataset_template: Course
@@ -13,24 +12,30 @@ data_cfgs:
   eval_data_files: null
   eval_dataset_optional_args: {}
   charge_file_path: ./data/charges.json
+  imprisonment_mapper_config:
+    imprisonment_mapper_type: "interval"
+    lower_bound: [0, 6, 7, 8, 9, 10, 12, 18, 25, 35, 61, 135]
+    represent_list: [0, 6, 7, 8, 9, 10, 12, 18, 30, 36, 72, 180]
 
 model_cfgs:
+  charge_num: 321
+  imprisonment_num: 12
   model_name_or_path: google-bert/bert-base-chinese
   model_max_length: 512
   cache_dir: null
-  auto_model_kwargs:
-    num_labels: 321
-    problem_type: multi_label_classification
+  auto_model_kwargs: {}
   auto_tokenizer_kwargs: {}
 
 train_cfgs:
-  output_dir: ./output/finetune/multi-charge
+  charge_weight: 1.0
+  imprisonment_weight: 2.0
+  output_dir: ./output/finetune/multi_task
   logging_strategy: steps
   logging_steps: 10
   eval_strategy: steps
-  eval_steps: 500
+  eval_steps: 10
   save_strategy: steps
-  save_steps: 500
+  save_steps: 10
   load_best_model_at_end: true
   learning_rate: 5.e-5
   weight_decay: 5.e-6
@@ -39,7 +44,7 @@ train_cfgs:
   num_train_epochs: 3
   report_to: wandb
   project_name: fnlp_project2
-  run_name: multi_charge_run
+  run_name: multi_task_run
   bf16: true
   fp16: false
   dataloader_num_workers: 4
@@ -47,5 +52,5 @@ train_cfgs:
   torch_compile: true
   seed: 42
   max_grad_norm: 8.0
-  metric_for_best_model: f1
+  metric_for_best_model: null
   greater_is_better: true

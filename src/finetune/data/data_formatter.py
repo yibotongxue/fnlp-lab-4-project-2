@@ -26,6 +26,13 @@ class ImprisonmentFormatteredSample(BaseModel):
     imprisonment: int
 
 
+@enable_bracket_access
+class BothFormatteredSample(BaseModel):
+    fact: str
+    charge_name: str
+    imprisonment: int
+
+
 class BaseFormatter(ABC):
     @abstractmethod
     def check_validation(self, raw_sample: dict[str, Any]) -> bool:
@@ -49,6 +56,12 @@ class BaseFormatter(ABC):
     def format_imprisonment_sample(
         self, raw_sample: dict[str, Any]
     ) -> list[ImprisonmentFormatteredSample]:
+        pass
+
+    @abstractmethod
+    def format_both_sample(
+        self, raw_sample: dict[str, Any]
+    ) -> list[BothFormatteredSample]:
         pass
 
 
@@ -111,4 +124,20 @@ class CourseFormatter(BaseFormatter):
                 )
                 result_dict["imprisonment"] = judgment.imprisonment
                 result_list.append(ImprisonmentFormatteredSample(**result_dict))
+        return result_list
+
+    @override
+    def format_both_sample(
+        self, raw_sample: dict[str, Any]
+    ) -> list[BothFormatteredSample]:
+        case_data_dict = CaseDataDict(**raw_sample)
+        outcome_list = case_data_dict.outcomes
+        result_list = []
+        for outcome in outcome_list:
+            judgment = outcome.judgment[0]
+            result_dict = {}
+            result_dict["fact"] = f"【当前被告人：{outcome.name}" + case_data_dict.fact
+            result_dict["charge_name"] = judgment.standard_accusation
+            result_dict["imprisonment"] = judgment.imprisonment
+            result_list.append(BothFormatteredSample(**result_dict))
         return result_list
