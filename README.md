@@ -1,6 +1,6 @@
 # 代码结构和运行说明
 
-本项目实现了北京大学自然语言处理基础第四次作业第二个项目——多被告法律判决预测，以下是对代码结构和运行说明的简要说明。
+本项目实现了北京大学自然语言处理基础第四次作业第二个项目——多被告法律判决预测，我们通过对预训练语言模型进行微调实现了对罪名和刑期的预测，以下是对代码结构和运行说明的简要说明。
 
 ## 项目结构
 
@@ -195,4 +195,52 @@ pip install -r requirements.txt
 
 ```bash
 ./scripts/submit/submit.sh
+```
+
+## 其他尝试的运行
+
+以下是报告中“其他的尝试“部分的运行，如果批改作业的时候也希望运行这部分，可以参考。
+
+### 多任务学习模型
+
+模型训练：
+
+```bash
+./scripts/multi_task/train.sh
+```
+
+模型推理：
+
+```bash
+./scripts/multi_task/eval.sh
+```
+
+### 零样本学习
+
+运行脚本
+
+```bash
+./scripts/zero_shot/eval.sh
+```
+
+### 检索增强生成
+
+生成嵌入向量
+
+```bash
+./scripts/embed/articles/articles.h
+```
+
+运行预测：
+
+```bash
+./scripts/rag/eval.sh
+```
+
+### 大模型校验选择
+
+运行脚本
+
+```bash
+./scripts/one-by-one/refine.sh
 ```
