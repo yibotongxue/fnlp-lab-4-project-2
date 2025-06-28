@@ -183,7 +183,9 @@ pip install -r requirements.txt
 ./scripts/one-by-one/train/imprisonment_train.sh
 ```
 
-批改作业时如果不希望从头训练模型，可以在[这里]()下载我们上传的检查点。
+批改作业时如果不希望从头训练模型，可以在[这里](https://disk.pku.edu.cn/link/AAA86D310EC17849B4A8C6EF1F53873CF0)下载我们上传的检查点，提取密码为9QO7。
+
+> Kaggle平台上是我们最高的测试分数，因为最高分数的检查点未能找到，上传的检查点是重新训练的，使用下载的检查点或者重新训练不一定达到Kaggle平台上的分数，至少我们本地测试的时候发现刑期预测的分数少了0.005，尽管分数有差异，但差异很小。
 
 运行推理脚本：
 

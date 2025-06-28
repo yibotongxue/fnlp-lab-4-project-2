@@ -58,14 +58,9 @@ def main():
 
     load_dotenv()
 
-    def _get_data(split: str = "train") -> LegalCaseDataset:
+    def _get_data(data_dir: str, split: str = "train") -> LegalCaseDataset:
         """Load the legal case dataset."""
-        if split == "train":
-            return LegalCaseDataset("./data/train.jsonl")
-        elif split == "test":
-            return LegalCaseDataset("./data/test.jsonl")
-        else:
-            raise ValueError("Invalid split. Use 'train' or 'test'.")
+        return LegalCaseDataset(os.path.join(data_dir, f"{split}.jsonl"))
 
     parser = argparse.ArgumentParser(description="One by One Predictor")
     parser.add_argument(
@@ -170,6 +165,12 @@ def main():
         help="Device to run the model on (cpu or cuda)",
     )
     parser.add_argument(
+        "--data-dir",
+        type=str,
+        default="./data",
+        help="The path to the directory of the data, which could contains the file train.jsonl and test.jsonl",
+    )
+    parser.add_argument(
         "--split",
         type=str,
         default="test",
@@ -202,7 +203,7 @@ def main():
         args.imprisonment_predictor, args
     )
     predictor = OneByOnePredictor(charge_predictor, imprisonment_predictor)
-    legal_data = _get_data(args.split)
+    legal_data = _get_data(args.data_dir, args.split)
     if args.train_size is not None:
         legal_data = legal_data[args.start_index : args.start_index + args.train_size]
     else:

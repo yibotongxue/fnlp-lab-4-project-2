@@ -14,8 +14,8 @@ data_cfgs:
   eval_dataset_optional_args: {}
   imprisonment_mapper_config:
     imprisonment_mapper_type: "interval"
-    lower_bound: [0, 6, 7, 8, 9, 10, 12, 18, 25, 35, 61, 135]
-    represent_list: [0, 6, 7, 8, 9, 10, 12, 18, 30, 36, 72, 180]
+    lower_bound: [0, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 15, 18, 24, 30, 36, 42, 48, 60, 73, 91, 115, 133, 169]
+    represent_list: [0, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 15, 18, 24, 30, 36, 42, 48, 60, 84, 96, 120, 144, 180]
 
 model_cfgs:
   model_name_or_path: google-bert/bert-base-chinese
@@ -30,15 +30,15 @@ train_cfgs:
   logging_strategy: steps
   logging_steps: 10
   eval_strategy: steps
-  eval_steps: 500
+  eval_steps: 200
   save_strategy: steps
-  save_steps: 500
+  save_steps: 200
   load_best_model_at_end: true
   learning_rate: 5.e-5
   weight_decay: 5.e-6
   per_device_train_batch_size: 8
   per_device_eval_batch_size: 8
-  num_train_epochs: 3
+  num_train_epochs: 1
   report_to: wandb
   project_name: fnlp_project2
   run_name: imprisonment_run

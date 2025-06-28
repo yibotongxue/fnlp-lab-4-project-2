@@ -1,4 +1,6 @@
 #! /bin/bash
 
+export PYTHONPATH=$PWD
+
 python ./scripts/score/score.py \
-    --output-dir ./output/one_by_one/finetune_finetune_eval
+    --output-dir ./output/zero_shot
